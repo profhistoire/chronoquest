@@ -1,0 +1,3397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff4d6">
+  <title>ChronoQuest — Les aventuriers des croyances</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
+  <style>
+    /* DESIGN REVISITÉ ET OPTIMISÉ POUR CHRONOQUEST */
+    :root {
+      --primary: #f5cb4e;
+      --primary-dark: #dca71f;
+      --bg: #13141c;
+      --bg-2: #1a1d2a;
+      --card-bg: #1f212d;
+      --card-bg-2: #262a3c;
+      --card-hover: #292c3d;
+      --text: #ffffff;
+      --text-muted: #a0a5c0;
+      --accent: #ff4757;
+      --success: #2ed573;
+      --font-title: 'Bangers', cursive;
+      --font-body: 'Nunito Sans', sans-serif;
+      --shadow: 0 12px 30px rgba(0,0,0,0.45);
+      --shadow-soft: 0 8px 18px rgba(0,0,0,0.22);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background:
+        radial-gradient(circle at top, rgba(245, 203, 78, 0.18), transparent 28%),
+        linear-gradient(180deg, #0f1017 0%, var(--bg) 100%);
+      color: var(--text);
+      font-family: var(--font-body);
+      padding: 20px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main { flex: 1; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+    /* MASTHEAD / HEADER */
+    header.masthead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: rgba(31, 33, 45, 0.9);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 4px solid var(--primary);
+      border-radius: var(--radius);
+      margin-bottom: 30px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 12px;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: var(--text);
+      font-family: var(--font-title);
+      font-size: 1.3rem;
+      letter-spacing: 1px;
+    }
+
+    .brand small {
+      display: block;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0;
+    }
+
+    .bolt {
+      background: var(--primary);
+      color: #000;
+      font-family: var(--font-title);
+      font-size: 1.6rem;
+      padding: 6px 14px;
+      border-radius: 10px;
+      box-shadow: 0 4px 0 var(--primary-dark);
+    }
+
+    .header-actions { display: flex; gap: 12px; }
+
+    /* TYPOGRAPHIE & TITRES */
+    h1, h2, h3 {
+      font-family: var(--font-title);
+      letter-spacing: 1.5px;
+    }
+
+    h1 { font-size: 2.8rem; color: var(--primary); text-shadow: 2px 2px 0px rgba(0,0,0,0.5); }
+    h2 { font-size: 1.9rem; margin-bottom: 12px; color: #fff; }
+
+    .eyebrow {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* CARTES & PANNEAUX */
+    .paper {
+      background: linear-gradient(180deg, rgba(31, 33, 45, 0.98), rgba(26, 29, 42, 0.96));
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.2s, background 0.2s, border-color 0.2s;
+    }
+
+    .paper:hover { transform: translateY(-2px); border-color: rgba(245,203,78,0.35); }
+
+    .cover {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-bottom: 30px;
+      align-items: center;
+    }
+
+    .cover-copy { flex: 1.2; min-width: 300px; }
+    .cover-art { 
+      flex: 0.8; 
+      min-width: 280px; 
+      background: linear-gradient(135deg, rgba(31,33,45,1) 0%, rgba(42,45,62,1) 100%); 
+      padding: 30px; 
+      border-radius: var(--radius); 
+      border: 2px solid var(--primary);
+      text-align: center;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover-art::before {
+      content: "";
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,203,78,0.35), rgba(245,203,78,0) 70%);
+      top: -30px;
+      right: -20px;
+    }
+
+    .bubble {
+      background: rgba(255,255,255,0.05);
+      padding: 16px;
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      margin: 16px 0 24px 0;
+      font-size: 1.05rem;
+    }
+
+    /* BOUTONS ET FORMULAIRES */
+    button.primary {
+      background: linear-gradient(180deg, #f7d370 0%, var(--primary) 100%);
+      color: #000;
+      font-weight: 800;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      box-shadow: 0 4px 0 var(--primary-dark);
+      transition: all 0.15s ease;
+    }
+
+    button.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 var(--primary-dark);
+      filter: saturate(1.15);
+    }
+
+    button.primary:active {
+      transform: translateY(2px);
+      box-shadow: 0 0 0 var(--primary-dark);
+    }
+
+    button.quiet {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    button.quiet:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border-color: rgba(255,255,255,0.28);
+    }
+
+    button.danger {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.danger:hover { background: #e03e4d; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      margin: 8px 0 18px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(23,24,33,0.95);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    input:hover, select:hover, textarea:hover {
+      border-color: rgba(245,203,78,0.45);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(245,203,78,0.18);
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .tabs button {
+      padding: 12px 24px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 10px;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+
+    .tabs button.selected {
+      background: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(245, 203, 78, 0.3);
+    }
+
+    /* TABLEAUX */
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    th {
+      background: rgba(0,0,0,0.3);
+      color: var(--primary);
+      font-family: var(--font-title);
+      letter-spacing: 1px;
+    }
+
+    /* GRILLE DE QUÊTES */
+    .quest-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .quest-card {
+      background: linear-gradient(180deg, rgba(31,33,45,0.96), rgba(23,25,35,0.96));
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .quest-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(245,203,78,0.4);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+    }
+
+    .quest-cover {
+      display: block;
+      width: 100%;
+      max-height: 190px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 14px;
+    }
+
+    .quest-auth-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      align-items: end;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .quest-auth-form label { display: block; font-weight: 800; }
+    .quest-auth-form input { width: 100%; margin-top: 5px; }
+    .quest-auth-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .quest-auth-status { min-height: 1.5em; margin-top: 10px; }
+    .quest-editor-preview { display: block; max-width: 100%; max-height: 180px; margin: 10px 0; border-radius: 10px; }
+
+    /* MODALE / DIALOGUE DE JEU */
+    dialog {
+      background: linear-gradient(180deg, rgba(31,33,45,0.98), rgba(22,24,34,0.98));
+      color: var(--text);
+      border: 2px solid var(--primary);
+      border-radius: 18px;
+      padding: 24px;
+      margin: auto;
+      max-width: 800px;
+      width: 90%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+
+    dialog::backdrop {
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    footer a { color: var(--primary); text-decoration: none; }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 14px;
+      }
+
+      header.masthead {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .cover {
+        gap: 20px;
+      }
+
+      .cover-copy, .cover-art {
+        min-width: 100%;
+      }
+
+      .tabs {
+        flex-wrap: wrap;
+      }
+
+      .tabs button {
+        flex: 1 1 160px;
+      }
+    }
+
+    /* Univers BD historique : papier clair, encre et contours expressifs */
+    :root {
+      --primary: #f5bd35;
+      --primary-dark: #bd781b;
+      --bg: #fff4d6;
+      --bg-2: #f7e7bd;
+      --card-bg: #fffdf6;
+      --card-bg-2: #fff8e9;
+      --card-hover: #fff3d4;
+      --text: #252b3a;
+      --text-muted: #5e6471;
+      --accent: #d94b43;
+      --success: #287c54;
+      --shadow: 5px 6px 0 rgba(37,43,58,0.2);
+      --shadow-soft: 3px 4px 0 rgba(37,43,58,0.13);
+      --radius: 16px;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(rgba(37,43,58,0.08) 1px, transparent 1px),
+        linear-gradient(135deg, #fff8e8 0%, #f5e4bd 100%);
+      background-size: 15px 15px, auto;
+      color: var(--text);
+    }
+
+    [hidden] { display: none !important; }
+
+    .skip-link {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      z-index: 100;
+      padding: 10px 14px;
+      color: #fff;
+      background: #252b3a;
+      border: 2px solid #fff;
+      border-radius: 6px;
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    :focus-visible {
+      outline: 3px solid #235b93;
+      outline-offset: 4px;
+    }
+
+    main, section, [role="tabpanel"] { scroll-margin-top: 120px; }
+
+    header.masthead {
+      background: #fffdf6;
+      border: 3px solid var(--text);
+      border-bottom-width: 7px;
+      box-shadow: 5px 6px 0 rgba(37,43,58,0.18);
+      backdrop-filter: none;
+    }
+
+    .brand { color: var(--text); }
+    .brand small { color: var(--text-muted); }
+
+    .bolt {
+      background: #f5bd35;
+      border: 3px solid var(--text);
+      box-shadow: 3px 4px 0 var(--text);
+      transform: rotate(-5deg);
+    }
+
+    h1 { color: #d94b43; text-shadow: 2px 2px 0 #fffdf6, 4px 4px 0 rgba(37,43,58,0.2); }
+    h2 { color: var(--text); }
+
+    .eyebrow { color: #a64b2a; }
+    .eyebrow::before { content: "✦ "; color: #d94b43; }
+
+    .paper {
+      background: var(--card-bg);
+      border: 2px solid var(--text);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .paper:hover { border-color: var(--text); }
+
+    .cover-art {
+      background:
+        radial-gradient(circle at 85% 12%, rgba(245,189,53,0.35), transparent 28%),
+        linear-gradient(145deg, #fffdf6, #f8e6bf);
+      border: 4px solid var(--text);
+      box-shadow: 7px 8px 0 rgba(37,43,58,0.2);
+      transform: rotate(1deg);
+    }
+
+    .cover-art::before {
+      content: "🏛️";
+      position: absolute;
+      inset: auto 12px 8px auto;
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      background: none;
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      opacity: 0.2;
+      pointer-events: none;
+    }
+
+    .cover-art > * { position: relative; z-index: 1; }
+    .cover-art h2 { color: #a64b2a !important; }
+    .cover-art p, .cover-art div { color: var(--text); }
+    .cover-art div[style*="background"] {
+      background: rgba(255,253,246,0.82) !important;
+      border-color: rgba(37,43,58,0.25) !important;
+      border-width: 2px !important;
+    }
+    .cover-art strong { color: #d94b43 !important; }
+
+    .bubble {
+      background: #fffdf6;
+      border: 2px solid var(--text);
+      border-left: 7px solid #d94b43;
+      border-radius: 18px 18px 18px 4px;
+      box-shadow: 3px 4px 0 rgba(37,43,58,0.12);
+      color: var(--text);
+    }
+
+    button.primary {
+      background: #f5bd35;
+      color: var(--text);
+      border: 2px solid var(--text);
+      border-radius: 12px;
+      box-shadow: 0 4px 0 var(--text);
+    }
+
+    button.primary:hover {
+      box-shadow: 0 6px 0 var(--text);
+      filter: none;
+    }
+
+    button.quiet {
+      background: #fffdf6;
+      color: var(--text);
+      border: 2px solid var(--text);
+      box-shadow: 2px 3px 0 rgba(37,43,58,0.15);
+    }
+
+    button.quiet:hover {
+      background: #fff0c8;
+      color: var(--text);
+      border-color: var(--text);
+    }
+
+    button.danger {
+      background: #d94b43;
+      color: #fff;
+      border: 2px solid var(--text);
+      box-shadow: 2px 3px 0 rgba(37,43,58,0.2);
+    }
+
+    input, select, textarea {
+      background: #fffdf6;
+      color: var(--text);
+      border: 2px solid #737783;
+    }
+
+    input::placeholder, textarea::placeholder { color: #5e6471; opacity: 1; }
+    input:focus, select:focus, textarea:focus {
+      border-color: #a64b2a;
+      box-shadow: 0 0 0 3px rgba(245,189,53,0.35);
+    }
+
+    input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 3px solid #235b93;
+      outline-offset: 2px;
+    }
+
+    .class-targets {
+      margin: 8px 0 18px;
+      padding: 14px;
+      border: 2px solid #737783;
+      border-radius: 12px;
+    }
+
+    .class-targets legend {
+      padding: 0 6px;
+      font-weight: 800;
+    }
+
+    .class-targets-hint {
+      margin-bottom: 10px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .class-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .class-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border: 1px solid rgba(37,43,58,0.28);
+      border-radius: 9px;
+      background: #fff8e9;
+      cursor: pointer;
+    }
+
+    .class-option input {
+      width: auto;
+      margin: 0;
+      accent-color: #a64b2a;
+    }
+
+    .class-options-empty {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .result-form { margin: 20px 0 34px; }
+    .result-group {
+      min-width: 0;
+      margin: 0 0 16px;
+      padding: 18px;
+      border: 2px solid rgba(37,43,58,0.22);
+      border-radius: 14px;
+      background: #fffaf0;
+    }
+
+    .result-group legend {
+      padding: 0 8px;
+      color: #8a4826;
+      font-weight: 900;
+    }
+
+    .result-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 0 18px;
+    }
+
+    .result-field {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      margin-bottom: 10px;
+    }
+
+    .result-field label { font-weight: 800; }
+    .result-field input, .result-field select { margin: 6px 0 8px; }
+    .result-field small { color: var(--text-muted); font-size: 0.82rem; }
+
+    .result-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 14px;
+    }
+
+    .result-actions button { min-height: 46px; }
+    .result-entry-hint {
+      max-width: 760px;
+      margin: -4px 0 20px;
+      color: var(--text-muted);
+    }
+    .results-empty { color: var(--text-muted); }
+    .results-empty { margin-top: 12px; }
+    .grade-legend { margin-top: 14px; color: var(--text-muted); font-size: 0.9rem; }
+
+    .score-instructions { margin: -4px 0 18px; }
+    .score-instructions summary { cursor: pointer; font-weight: 800; }
+    .score-instructions p { margin: 8px 0; color: var(--text-muted); }
+    .score-instructions pre {
+      overflow-x: auto;
+      padding: 12px;
+      border: 1px solid rgba(37,43,58,0.2);
+      border-radius: 8px;
+      background: #f5e4bd;
+    }
+
+    .grade-badge {
+      display: inline-flex;
+      min-width: 38px;
+      min-height: 34px;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 9px;
+      border: 2px solid currentColor;
+      border-radius: 9px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .grade-a { color: #17613b; background: #d7f2df; }
+    .grade-b { color: #275b91; background: #dcecff; }
+    .grade-c { color: #765614; background: #fff0bd; }
+    .grade-d { color: #98501b; background: #ffe2c4; }
+    .grade-e { color: #a52e32; background: #ffd9d8; }
+    .grade-missing { color: #5e6471; background: #ececf0; }
+
+    @media (max-width: 520px) {
+      .result-group { padding: 14px 12px; }
+      .result-fields { grid-template-columns: minmax(0, 1fr); }
+      .result-actions { justify-content: stretch; }
+      .result-actions button { width: 100%; }
+    }
+
+    .tabs button {
+      background: #fffdf6;
+      border: 2px solid var(--text);
+      color: var(--text-muted);
+      box-shadow: 2px 3px 0 rgba(37,43,58,0.12);
+    }
+
+    .tabs button.selected {
+      background: #f5bd35;
+      color: var(--text);
+      border: 3px solid var(--text);
+      box-shadow: 3px 4px 0 var(--text);
+    }
+
+    th, td { border-bottom: 1px solid rgba(37,43,58,0.18); }
+    th {
+      background: #f5e4bd;
+      color: #8a4826;
+      border-bottom: 3px solid var(--text);
+    }
+    tbody tr:nth-child(even) { background: rgba(245,189,53,0.1); }
+
+    .quest-card {
+      background: #fffdf6;
+      border: 2px solid var(--text);
+      box-shadow: 4px 5px 0 rgba(37,43,58,0.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quest-card::before {
+      content: "📜";
+      display: block;
+      width: fit-content;
+      margin: 0 0 12px auto;
+      font-size: 1.8rem;
+      filter: drop-shadow(1px 2px 0 rgba(37,43,58,0.2));
+    }
+
+    .quest-card:hover {
+      border-color: var(--text);
+      box-shadow: 6px 7px 0 rgba(37,43,58,0.2);
+    }
+
+    .quest-card h3 { color: #a64b2a; }
+    .quest-card p { color: var(--text-muted) !important; }
+
+    dialog {
+      background: #fff8e9;
+      color: var(--text);
+      border: 4px solid var(--text);
+      box-shadow: 8px 9px 0 rgba(37,43,58,0.3);
+    }
+
+    dialog h2 { color: #a64b2a !important; }
+    dialog::backdrop { background: rgba(37,43,58,0.58); }
+
+    footer {
+      border-top: 3px solid var(--text);
+      color: var(--text-muted);
+    }
+
+    footer strong { color: #a64b2a; font-family: var(--font-title); font-size: 1.25rem; }
+
+    body > div[style*="position: fixed"] {
+      background: #fffdf6 !important;
+      border: 3px solid var(--text) !important;
+      box-shadow: 4px 5px 0 rgba(37,43,58,0.22) !important;
+    }
+
+    body > div[style*="position: fixed"] span { color: #a64b2a !important; }
+    body > div[style*="position: fixed"] button {
+      background: #f5bd35 !important;
+      color: var(--text) !important;
+      border: 2px solid var(--text) !important;
+      box-shadow: 2px 3px 0 rgba(37,43,58,0.2);
+    }
+
+    @media (max-width: 520px) {
+      h1 { font-size: 2.2rem; }
+      .cover-art { transform: none; }
+      #student-form > div { flex-wrap: wrap; }
+      #student-form .primary { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="ChronoQuest, accueil">
+      <span class="bolt" aria-hidden="true">🧭</span>
+      <span>CHRONOQUEST<small>LE CARNET DES AVENTURIERS DES CROYANCES</small></span>
+    </a>
+    <nav class="header-actions" aria-label="Actions principales">
+      <button id="sound" class="quiet" onclick="alert('Option sonore à venir !')">🔊 Son</button>
+      <button id="student-open" class="primary" type="button" onclick="ouvrirEspaceEleve()">Espace élève / connexion</button>
+      <button id="teacher-open" class="quiet" onclick="activerVueTest('teacher-space')">Espace enseignant</button>
+    </nav>
+  </header>
+
+  <a class="skip-link" href="#main-content">Aller au contenu principal</a>
+
+  <main id="main-content">
+    <!-- PAGE D'ACCUEIL -->
+    <section id="landing">
+      <div class="cover">
+        <div class="cover-copy">
+          <span class="eyebrow">NOUVELLE MISSION : COMPRENDRE LES CROYANCES</span>
+          <h1 tabindex="-1">DES SIÈCLES D’HISTOIRES.<br><em>À TOI D’EXPLORER !</em></h1>
+          <p class="bubble">Pourquoi les humains croient-ils ? Comment leurs croyances évoluent-elles ? Voyage dans le temps, mène l’enquête et découvre des façons de voir le monde.</p>
+          
+          <form id="student-form" class="quest-auth-form" onsubmit="connecterEleve(event)">
+            <div>
+              <label for="student-email">Ton adresse e-mail scolaire</label>
+              <input id="student-email" name="email" type="email" autocomplete="username" required placeholder="prenom.nom@ecole.be">
+            </div>
+            <div>
+              <label for="student-password">Ton mot de passe ChronoQuest</label>
+              <input id="student-password" name="password" type="password" autocomplete="current-password" required>
+            </div>
+            <button class="primary" type="submit">Se connecter ↗</button>
+            <button class="quiet" type="button" onclick="envoyerLienReinitialisation()">Mot de passe oublié ?</button>
+            <small id="email-hint" style="color: var(--text-muted);">Utilise le compte élève créé pour toi dans ChronoQuest. Le mot de passe de l’école ne fonctionnera que si le compte a été configuré pour cela.</small>
+            <p id="student-auth-status" class="quest-auth-status" role="status" aria-live="polite"></p>
+          </form>
+          <form id="student-password-reset-form" class="quest-auth-form" onsubmit="enregistrerNouveauMotDePasse(event)" hidden>
+            <h2>Choisir un nouveau mot de passe</h2>
+            <label for="student-new-password">Nouveau mot de passe</label>
+            <input id="student-new-password" type="password" autocomplete="new-password" required>
+            <label for="student-new-password-confirm">Confirmer le nouveau mot de passe</label>
+            <input id="student-new-password-confirm" type="password" autocomplete="new-password" required>
+            <button class="primary" type="submit">Enregistrer le mot de passe</button>
+            <p id="student-password-reset-status" class="quest-auth-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <div class="cover-art">
+          <span class="eyebrow">LE MONDE CHANGE</span>
+          <h2 style="color: var(--primary); margin: 15px 0;">OBSERVER &amp; COMPARER</h2>
+          <div style="display:grid; gap:10px; margin-top:18px; text-align:left;">
+            <div style="background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px 14px;">
+              <strong style="color: var(--primary);">01</strong> · Comparer des croyances à travers les siècles
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px 14px;">
+              <strong style="color: var(--primary);">02</strong> · Analyser les rites et les récits
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px 14px;">
+              <strong style="color: var(--primary);">03</strong> · Comprendre sans jugement
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ESPACE ÉLÈVE -->
+    <section id="student-space" hidden>
+      <div class="paper" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span class="eyebrow">TON QUARTIER GÉNÉRAL</span>
+          <h1 id="greeting" tabindex="-1">Salut, aventurier !</h1>
+          <p id="student-class" style="color: var(--text-muted);">Classe autorisée : Toutes classes</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="background:var(--primary); color:#000; padding:8px 16px; border-radius:20px; font-weight:800; font-size:0.85rem;">SESSION ACTIVE</span>
+          <button id="student-logout" class="quiet" type="button" onclick="deconnecterEleve()">Quitter l’espace élève</button>
+          <button id="preview-teacher-return" class="quiet" type="button" onclick="retournerVueEnseignant()" hidden>Retour à la vue enseignant</button>
+        </div>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Espace élève">
+        <button id="tab-hub" class="selected" type="button" role="tab" aria-selected="true" aria-controls="hub" onclick="basculerOngletEleve('hub')">Mes quêtes</button>
+        <button id="tab-report" type="button" role="tab" aria-selected="false" aria-controls="report" tabindex="-1" onclick="basculerOngletEleve('report')">Mon Bilan</button>
+      </nav>
+
+      <div id="hub" role="tabpanel" aria-labelledby="tab-hub" tabindex="0">
+        <p id="game-catalog-status" class="results-empty" role="status" aria-live="polite" hidden></p>
+        <div class="quest-grid" id="student-quest-list" aria-live="polite">
+          <!-- Les quêtes s'afficheront ici -->
+        </div>
+      </div>
+
+      <div id="report" role="tabpanel" aria-labelledby="tab-report" tabindex="0" hidden>
+        <div class="paper">
+          <h2>Ton bilan des compétences</h2>
+          <div class="table-wrap">
+            <table>
+              <caption class="visually-hidden">Bilan des compétences de l’élève par mission</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Mission</th>
+                  <th scope="col">Score</th>
+                  <th scope="col">C1</th>
+                  <th scope="col">C2</th>
+                  <th scope="col">C3</th>
+                  <th scope="col">C4</th>
+                </tr>
+              </thead>
+              <tbody id="student-results-body"></tbody>
+            </table>
+            <p id="student-results-empty" class="results-empty">Tes résultats apparaîtront ici après une mission.</p>
+            <p class="grade-legend"><strong>Repères :</strong> A ≥ 90 % · B ≥ 75 % · C ≥ 60 % · D ≥ 50 % · E &lt; 50 %</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESPACE ENSEIGNANT -->
+    <section id="teacher-space" hidden>
+      <div class="paper" style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+        <div>
+          <span class="eyebrow">DANS LES COULISSES DE L’AVENTURE</span>
+          <h1 tabindex="-1">Le QG enseignant</h1>
+          <p style="color: var(--text-muted);">Gérez vos quêtes et leurs images. Les missions sont sauvegardées dans Supabase et conservées sur cet appareil comme copie de secours.</p>
+        </div>
+        <p id="supabase-storage-status" role="status" aria-live="polite" style="flex-basis:100%; color: var(--text-muted); margin-top: 10px;"></p>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Espace enseignant">
+        <button id="t-tab-account" class="selected" type="button" role="tab" aria-selected="true" aria-controls="teacher-account" onclick="basculerOngletEnseignant('account')">Compte enseignant</button>
+        <button id="t-tab-manage" type="button" role="tab" aria-selected="false" aria-controls="manage" tabindex="-1" onclick="basculerOngletEnseignant('manage')">Missions</button>
+        <button id="t-tab-roster" type="button" role="tab" aria-selected="false" aria-controls="roster" tabindex="-1" onclick="basculerOngletEnseignant('roster')">Liste des Élèves (Excel)</button>
+        <button id="t-tab-passwords" type="button" role="tab" aria-selected="false" aria-controls="passwords" tabindex="-1" onclick="basculerOngletEnseignant('passwords')">Réinitialisation des mots de passe</button>
+        <button id="t-tab-tracking" type="button" role="tab" aria-selected="false" aria-controls="tracking" tabindex="-1" onclick="basculerOngletEnseignant('tracking')">Résultats</button>
+      </nav>
+
+      <div id="teacher-account" role="tabpanel" aria-labelledby="t-tab-account" tabindex="0">
+        <article class="paper" aria-labelledby="teacher-auth-title">
+          <h2 id="teacher-auth-title">Accès enseignant</h2>
+          <form id="teacher-login-form" class="quest-auth-form" onsubmit="connecterEnseignant(event)">
+            <div>
+              <label for="teacher-email">E-mail enseignant</label>
+              <input id="teacher-email" type="email" autocomplete="username" required>
+            </div>
+            <div>
+              <label for="teacher-password">Mot de passe</label>
+              <input id="teacher-password" type="password" autocomplete="current-password" required>
+            </div>
+            <button class="primary" type="submit">Se connecter</button>
+          </form>
+          <div id="teacher-session" hidden>
+            <p id="teacher-session-email"></p>
+            <button class="quiet" type="button" onclick="deconnecterEnseignant()">Se déconnecter</button>
+          </div>
+          <p id="teacher-auth-status" class="quest-auth-status" role="status" aria-live="polite">Connexion Supabase en cours…</p>
+        </article>
+      </div>
+
+      <!-- ONGLET GESTION DU CODE DES JEUX -->
+      <div id="manage" role="tabpanel" aria-labelledby="t-tab-manage" tabindex="0" hidden>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+          
+          <!-- Formulaire de création -->
+          <article class="paper">
+            <h2>Ajouter une quête (Code jeu)</h2>
+            <form id="quest-form" onsubmit="ajouterQuete(event)">
+              <input id="q-id" type="hidden">
+              <fieldset id="quest-form-fields">
+              <legend>Informations de la mission</legend>
+              <label for="q-title">Titre de la mission</label>
+              <input id="q-title" required placeholder="Ex. Rites et récits à travers les siècles">
+
+              <fieldset class="class-targets">
+                <legend>Diffuser le jeu aux classes</legend>
+                <p class="class-targets-hint">Choisis une ou plusieurs classes, ou sélectionne toutes les classes.</p>
+                <div id="q-class-options" class="class-options"></div>
+              </fieldset>
+
+              <label for="q-code">Code HTML / JavaScript du jeu</label>
+              <textarea id="q-code" rows="8" required placeholder="Collez ici le code HTML/JS complet du mini-jeu..."></textarea>
+              <label for="q-image">Image de couverture (facultatif, PNG/JPEG/WebP/GIF, 500 Ko max.)</label>
+              <input id="q-image" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+              <img id="q-image-preview" class="quest-editor-preview" alt="Aperçu de l’image de couverture" hidden>
+              <label id="q-image-remove-label" hidden>
+                <input id="q-image-remove" type="checkbox">
+                Retirer l’image actuelle
+              </label>
+              <details class="score-instructions">
+                <summary>Comment transmettre le score et les réponses ?</summary>
+                <p>À la fin du jeu, ajoute cette instruction dans son JavaScript. Les compétences sont facultatives (0 à 100) et « answers » peut contenir les réponses détaillées (JSON).</p>
+                <pre><code>parent.postMessage({
+  type: "chronoquest-result",
+  score: 16,
+  maxScore: 20,
+  competencies: {
+    C1: 80,
+    C2: 75,
+    C3: 90,
+    C4: 85
+  },
+  answers: [
+    { question: "q1", answer: "Réponse de l’élève" }
+  ]
+}, "*");</code></pre>
+              </details>
+
+              <button class="primary" type="submit" style="width: 100%;">Publier la mission ↗</button>
+              <button id="q-cancel-edit" class="quiet" type="button" onclick="annulerModificationQuete()" hidden>Annuler la modification</button>
+              </fieldset>
+            </form>
+            <p id="quest-save-status" role="status" aria-live="polite"></p>
+          </article>
+
+          <!-- Liste des jeux actifs avec option de suppression -->
+          <article class="paper">
+            <h2>Quêtes publiées (<span id="quest-count" aria-live="polite">0</span>)</h2>
+            <div id="teacher-quests-list" aria-live="polite">
+              <!-- Liste générée dynamiquement -->
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- ONGLET IMPORTATION EXCEL -->
+      <div id="roster" role="tabpanel" aria-labelledby="t-tab-roster" tabindex="0" hidden>
+        <article class="paper">
+          <h2>Importer la liste officielle des élèves</h2>
+          <p style="color: var(--text-muted); margin-bottom: 15px;">Fichier Excel (.xlsx, .xls) ou CSV. Colonnes attendues : <strong>email, nom, classe</strong>.</p>
+          
+          <label for="excel-file">Fichier de la liste des élèves</label>
+          <input type="file" id="excel-file" accept=".xlsx, .xls, .csv">
+          <button class="primary" type="button" onclick="chargerFichierExcel()">Vérifier et importer la liste</button>
+          
+          <div class="table-wrap" style="margin-top:20px;">
+            <h3>Élèves enregistrés</h3>
+            <table id="roster-table">
+              <caption class="visually-hidden">Liste des élèves enregistrés</caption>
+              <thead>
+                <tr>
+                  <th scope="col">E-mail</th>
+                  <th scope="col">Nom</th>
+                  <th scope="col">Classe</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+
+      <!-- ONGLET RÉINITIALISATION DES MOTS DE PASSE -->
+      <div id="passwords" role="tabpanel" aria-labelledby="t-tab-passwords" tabindex="0" hidden>
+        <article class="paper">
+          <h2>Réinitialiser le mot de passe d’un élève</h2>
+          <p>Choisis un élève et génère un mot de passe provisoire individuel. Transmets-le par un canal privé et demande à l’élève de le remplacer; le lien « Mot de passe oublié ? » nécessite une configuration SMTP.</p>
+          <form id="teacher-reset-student-password-form" class="quest-auth-form" onsubmit="reinitialiserMotDePasseEleve(event)">
+            <div>
+              <label for="reset-student-email">Élève</label>
+              <select id="reset-student-email" onchange="effacerMotDePasseTemporaire()" required></select>
+            </div>
+            <div>
+              <label for="reset-student-password">Nouveau mot de passe temporaire</label>
+              <input id="reset-student-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required aria-describedby="reset-password-hint">
+              <div class="quest-auth-actions">
+                <button class="quiet" type="button" onclick="genererMotDePasseTemporaire()">Générer un mot de passe</button>
+                <button id="reset-password-visibility" class="quiet" type="button" onclick="basculerVisibiliteMotDePasseTemporaire()">Afficher</button>
+              </div>
+              <small id="reset-password-hint">Au moins 12 caractères. Ne le réutilise pas pour un autre service.</small>
+            </div>
+            <div>
+              <label for="reset-student-password-confirm">Confirmer le mot de passe</label>
+              <input id="reset-student-password-confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+            </div>
+            <button class="primary" type="submit">Réinitialiser le mot de passe</button>
+            <p id="teacher-reset-password-status" class="quest-auth-status" role="status" aria-live="polite"></p>
+          </form>
+        </article>
+      </div>
+
+      <!-- ONGLET RÉSULTATS -->
+      <div id="tracking" role="tabpanel" aria-labelledby="t-tab-tracking" tabindex="0" hidden>
+        <article class="paper">
+          <h2>Enregistrer un résultat</h2>
+          <p id="result-entry-hint" class="result-entry-hint">Complète les informations dans l’ordre. Le score est obligatoire ; les compétences C1 à C4 sont facultatives et se saisissent en pourcentage. Une nouvelle saisie remplace le résultat précédent de cet élève pour cette mission.</p>
+          <form id="result-form" class="result-form" onsubmit="enregistrerResultatEnseignant(event)">
+            <fieldset class="result-group">
+              <legend>1. Élève et mission</legend>
+              <div class="result-fields">
+                <div class="result-field">
+                  <label for="result-student">Élève</label>
+                  <select id="result-student" aria-describedby="result-entry-hint" required></select>
+                </div>
+                <div class="result-field">
+                  <label for="result-quest">Mission</label>
+                  <select id="result-quest" aria-describedby="result-entry-hint" required></select>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="result-group">
+              <legend>2. Résultat général</legend>
+              <div class="result-fields">
+                <div class="result-field">
+                  <label for="result-score">Score sur 20</label>
+                  <input id="result-score" type="number" min="0" max="20" step="0.5" placeholder="Ex. 16" aria-describedby="result-score-hint" required>
+                  <small id="result-score-hint">De 0 à 20, par demi-point.</small>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="result-group">
+              <legend>3. Compétences (facultatif)</legend>
+              <div class="result-fields">
+                <div class="result-field">
+                  <label for="result-c1">C1</label>
+                  <input id="result-c1" type="number" min="0" max="100" step="1" placeholder="Ex. 80 %" aria-describedby="result-competencies-hint">
+                </div>
+                <div class="result-field">
+                  <label for="result-c2">C2</label>
+                  <input id="result-c2" type="number" min="0" max="100" step="1" placeholder="Ex. 75 %" aria-describedby="result-competencies-hint">
+                </div>
+                <div class="result-field">
+                  <label for="result-c3">C3</label>
+                  <input id="result-c3" type="number" min="0" max="100" step="1" placeholder="Ex. 90 %" aria-describedby="result-competencies-hint">
+                </div>
+                <div class="result-field">
+                  <label for="result-c4">C4</label>
+                  <input id="result-c4" type="number" min="0" max="100" step="1" placeholder="Ex. 85 %" aria-describedby="result-competencies-hint">
+                </div>
+              </div>
+              <small id="result-competencies-hint">Saisis un nombre de 0 à 100. Laisse vide si la compétence n’a pas été évaluée.</small>
+            </fieldset>
+
+            <div class="result-actions">
+              <button class="primary" type="submit">Enregistrer le résultat</button>
+            </div>
+          </form>
+
+          <h2>Résultats des élèves</h2>
+          <nav class="tabs" role="tablist" aria-label="Vues des résultats">
+            <button id="teacher-results-mission-tab" class="selected" type="button" role="tab"
+              aria-selected="true" aria-controls="teacher-results-by-mission"
+              onclick="basculerVueResultatsEnseignant('mission')">Par mission et classe</button>
+            <button id="teacher-results-student-tab" type="button" role="tab"
+              aria-selected="false" aria-controls="teacher-results-by-student"
+              onclick="basculerVueResultatsEnseignant('student')">Par élève</button>
+          </nav>
+
+          <section id="teacher-results-by-mission" role="tabpanel"
+            aria-labelledby="teacher-results-mission-tab" tabindex="0">
+            <p>Cette vue affiche le dernier résultat enregistré de chaque élève pour la mission choisie.</p>
+            <div class="result-fields" style="max-width: 760px; margin: 12px 0;">
+              <div class="result-field">
+                <label for="teacher-quest-filter">Mission à afficher</label>
+                <select id="teacher-quest-filter" onchange="rendreTableauEnseignant()" aria-controls="teacher-results-body">
+                  <option value="*">Toutes les missions</option>
+                </select>
+              </div>
+              <div class="result-field">
+                <label for="teacher-class-filter">Classe à afficher</label>
+                <select id="teacher-class-filter" onchange="rendreTableauEnseignant()" aria-controls="teacher-results-body">
+                  <option value="*">Toutes les classes</option>
+                </select>
+              </div>
+            </div>
+            <p id="teacher-results-summary" class="results-empty" role="status" aria-live="polite"></p>
+            <div class="table-wrap">
+              <table>
+                <caption class="visually-hidden">Derniers résultats par élève, filtrables par mission et classe, avec le détail des compétences</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Élève</th>
+                    <th scope="col">Prénom</th>
+                    <th scope="col">Classe</th>
+                    <th scope="col">Mission</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">C1</th>
+                    <th scope="col">C2</th>
+                    <th scope="col">C3</th>
+                    <th scope="col">C4</th>
+                  </tr>
+                </thead>
+                <tbody id="teacher-results-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="teacher-results-by-student" role="tabpanel"
+            aria-labelledby="teacher-results-student-tab" tabindex="0" hidden>
+            <div class="result-fields" style="max-width: 520px; margin: 12px 0;">
+              <div class="result-field">
+                <label for="teacher-history-student">Élève à afficher</label>
+                <select id="teacher-history-student" onchange="chargerHistoriqueEleveEnseignant()">
+                  <option value="">Choisir un élève</option>
+                </select>
+              </div>
+            </div>
+            <p id="teacher-history-summary" class="results-empty" role="status" aria-live="polite">
+              Choisis un élève pour afficher l’historique complet de ses missions.
+            </p>
+            <div class="table-wrap">
+              <table>
+                <caption class="visually-hidden">Historique complet des résultats de l’élève choisi</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Mission</th>
+                    <th scope="col">Classe</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">C1</th>
+                    <th scope="col">C2</th>
+                    <th scope="col">C3</th>
+                    <th scope="col">C4</th>
+                  </tr>
+                </thead>
+                <tbody id="teacher-history-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- FENÊTRE D'EXÉCUTION DU MINI-JEU -->
+  <dialog id="game-dialog" aria-labelledby="game-title">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h2 id="game-title" style="margin:0; font-size: 1.6rem; color:var(--primary);">Mission</h2>
+      <button id="game-close" class="quiet" type="button" onclick="fermerJeu()">Fermer la mission ×</button>
+    </div>
+    <iframe id="game-frame" title="Mini-jeu de la mission" sandbox="allow-scripts" style="width:100%; height:450px; border:1px solid rgba(255,255,255,0.2); border-radius:10px; background:#fff;"></iframe>
+    <p id="game-result-status" role="status" aria-live="polite"></p>
+  </dialog>
+
+  <footer>
+    <strong>CHRONOQUEST</strong>
+    <span>L’évolution des religions et croyances à travers les siècles.</span>
+    <span>Observer. Comprendre. Respecter.</span>
+  </footer>
+
+  <!-- BARRE DE SECOURS / MODE TEST -->
+  <nav id="test-navigation" aria-label="Navigation du mode test" hidden style="position: fixed; bottom: 12px; right: 12px; z-index: 99999; background: #1f212d; border: 2px solid #f5cb4e; padding: 8px 14px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: flex; gap: 8px; align-items: center;">
+    <span style="font-size: 0.75rem; font-weight: bold; color: #f5cb4e; text-transform: uppercase;">MODE TEST :</span>
+    <button type="button" onclick="activerVueTest('landing')" style="background:#333; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Accueil</button>
+    <button type="button" onclick="activerVueTest('student-space')" style="background:#205c33; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Vue Élève</button>
+    <button type="button" onclick="activerVueTest('teacher-space')" style="background:#174f87; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Vue Enseignant</button>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
+  <script>
+    const CLE_CACHE_QUETES = 'chronoquest.quests.v1';
+    const TAILLE_MAX_IMAGE = 500 * 1024;
+    const COMPETENCE_KEYS = ['C1', 'C2', 'C3', 'C4'];
+    const ANCIENNES_COMPETENCES = {
+      C1: 'observation',
+      C2: 'analyse',
+      C3: 'comprehension'
+    };
+    const QUETES_INTEGREES = [
+      {
+        id: 'chronoromain',
+        title: "ChronoRomain - Les chiffres romains",
+        classrooms: ["*"],
+        url: "./indexchiffresromains.html",
+        integrated: true
+      }
+    ];
+    let quetesCatalogue = [];
+    let meQuetes = [...QUETES_INTEGREES];
+    let changementsQuetesEnAttente = [];
+    let eleveConnecte = null;
+    let modeApercuEnseignant = false;
+    let modeReinitialisationMotDePasse = false;
+    let resultats = [];
+    let queteEnCours = null;
+    let supabaseClient = null;
+    let enseignantConnecte = false;
+    let idQueteEnModification = null;
+    let supabaseConfigurationErreur = 'Supabase n’est pas configuré. Consulte le fichier SUPABASE.md.';
+
+    function detailErreur(error) {
+      return error && typeof error.message === 'string' ? error.message : String(error);
+    }
+
+    async function chargerCatalogueJeux() {
+      const statut = document.getElementById('game-catalog-status');
+      try {
+        const reponse = await fetch('./games.json', { cache: 'no-cache' });
+        if (!reponse.ok) {
+          throw new Error(`games.json est inaccessible (HTTP ${reponse.status}).`);
+        }
+        const jeux = await reponse.json();
+        if (!Array.isArray(jeux)) {
+          throw new Error('Le fichier games.json doit contenir une liste de jeux.');
+        }
+
+        const catalogue = jeux.map(jeu => {
+          if (!jeu || typeof jeu.id !== 'string' || !jeu.id.trim() ||
+              typeof jeu.title !== 'string' || !jeu.title.trim() ||
+              typeof jeu.description !== 'string' ||
+              typeof jeu.folder !== 'string' || !jeu.folder.trim()) {
+            throw new Error('Chaque jeu doit avoir un id, un titre, une description et un dossier.');
+          }
+
+          const id = jeu.id.trim();
+          const dossier = jeu.folder.trim().replace(/\\/g, '/').replace(/\/+$/, '');
+          if (dossier.startsWith('/') || dossier.split('/').includes('..')) {
+            throw new Error(`Le dossier du jeu « ${jeu.title} » n’est pas un chemin relatif valide.`);
+          }
+          if (dossier === '.' && id !== 'chronoromain') {
+            throw new Error(`Le jeu « ${jeu.title} » doit avoir son propre dossier avec un fichier index.html.`);
+          }
+
+          // ChronoRomain is still stored in the Hub root under its legacy filename.
+          const chemin = dossier === '.' && id === 'chronoromain'
+            ? './indexchiffresromains.html'
+            : `${dossier}/index.html`;
+          const url = new URL(chemin, document.baseURI);
+          if (url.origin !== window.location.origin) {
+            throw new Error(`Le jeu « ${jeu.title} » doit être hébergé dans le même site que le Hub.`);
+          }
+
+          return {
+            id,
+            title: jeu.title.trim(),
+            description: jeu.description.trim(),
+            classrooms: ['*'],
+            url: url.href,
+            integrated: true
+          };
+        });
+
+        quetesCatalogue = catalogue;
+        const existantes = meQuetes.map(quete => {
+          const jeuCatalogue = catalogue.find(jeu => String(jeu.id) === String(quete.id));
+          return jeuCatalogue
+            ? {
+                ...jeuCatalogue,
+                ...quete,
+                title: jeuCatalogue.title,
+                description: jeuCatalogue.description,
+                url: jeuCatalogue.url,
+                integrated: true
+              }
+            : quete;
+        });
+        meQuetes = appliquerChangementsEnAttente(fusionnerQuetes(
+          existantes,
+          catalogue.filter(jeu => !meQuetes.some(quete => String(quete.id) === String(jeu.id)))
+        ));
+        statut.hidden = true;
+        statut.textContent = '';
+        rafraichirQuetes();
+      } catch (error) {
+        statut.hidden = false;
+        statut.textContent = `Impossible de charger games.json : ${detailErreur(error)}. Le jeu intégré reste disponible si son fichier est présent.`;
+      }
+    }
+
+    function fusionnerQuetes(...listes) {
+      const fusion = new Map();
+      listes.flat().forEach(quete => fusion.set(String(quete.id), quete));
+      return [...fusion.values()];
+    }
+
+    function appliquerChangementsEnAttente(quetes) {
+      const resultat = new Map(quetes.map(quete => [String(quete.id), quete]));
+      changementsQuetesEnAttente.forEach(changement => {
+        if (changement.type === 'delete') resultat.delete(String(changement.id));
+        else if (changement.quest) resultat.set(String(changement.id), changement.quest);
+      });
+      return [...resultat.values()];
+    }
+
+    function sauvegarderCacheQuetes() {
+      try {
+        localStorage.setItem(CLE_CACHE_QUETES, JSON.stringify({
+          quests: meQuetes,
+          pending: changementsQuetesEnAttente
+        }));
+        return true;
+      } catch (error) {
+        const detail = ` ${detailErreur(error)}`;
+        document.getElementById('quest-save-status').textContent =
+          `La copie locale n’a pas pu être sauvegardée.${detail}`;
+        return false;
+      }
+    }
+
+    function chargerCacheQuetes() {
+      try {
+        const cache = localStorage.getItem(CLE_CACHE_QUETES);
+        if (!cache) return;
+        const donnees = JSON.parse(cache);
+        const quetesLocales = Array.isArray(donnees.quests) ? donnees.quests : [];
+        changementsQuetesEnAttente = Array.isArray(donnees.pending) ? donnees.pending : [];
+        meQuetes = appliquerChangementsEnAttente(fusionnerQuetes(QUETES_INTEGREES, quetesLocales));
+      } catch (error) {
+        const detail = ` ${detailErreur(error)}`;
+        document.getElementById('quest-save-status').textContent =
+          `La copie locale des missions est illisible; seules les missions intégrées sont affichées.${detail}`;
+      }
+    }
+
+    function afficherEtatAuthentification(session, message = '') {
+      const formulaire = document.getElementById('teacher-login-form');
+      const sessionElement = document.getElementById('teacher-session');
+      const estConnecte = Boolean(session && enseignantConnecte);
+      actualiserBoutonEspaceEleve();
+      formulaire.hidden = estConnecte;
+      sessionElement.hidden = !estConnecte;
+      document.getElementById('teacher-session-email').textContent = estConnecte
+        ? `Connecté en tant que ${session.user.email}.`
+        : '';
+      document.getElementById('quest-form-fields').disabled = !estConnecte;
+      document.getElementById('teacher-auth-status').textContent = message ||
+        (estConnecte
+          ? 'Compte enseignant vérifié. Les missions et leurs images sont synchronisées.'
+          : 'Connecte-toi avec le compte enseignant autorisé pour ajouter ou modifier des missions.');
+      rafraichirQuetes();
+    }
+
+    async function actualiserSessionEnseignant(session) {
+      enseignantConnecte = false;
+      document.getElementById('test-navigation').hidden = true;
+      modeApercuEnseignant = false;
+      document.getElementById('preview-teacher-return').hidden = true;
+      if (!session || !supabaseClient) {
+        basculerOngletEnseignant('account');
+        eleveConnecte = null;
+        resultats = [];
+        document.getElementById('student-auth-status').textContent = '';
+        document.getElementById('student-space').hidden = true;
+        rendreTableauResultats();
+        afficherEtatAuthentification(null);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient.rpc('is_hub_teacher');
+        if (error) throw error;
+        enseignantConnecte = data === true;
+        if (enseignantConnecte) {
+          document.getElementById('test-navigation').hidden = false;
+          eleveConnecte = null;
+          resultats = [];
+          document.getElementById('student-space').hidden = true;
+          afficherEtatAuthentification(session);
+          activerVueTest('teacher-space');
+          basculerOngletEnseignant('manage');
+          await Promise.all([
+            chargerQuetesDistant(),
+            chargerListeElevesDistant(),
+            chargerResultatsEnseignant()
+          ]);
+        } else {
+          basculerOngletEnseignant('account');
+          eleveConnecte = null;
+          resultats = [];
+          document.getElementById('student-space').hidden = true;
+          rendreTableauResultats();
+          afficherEtatAuthentification(
+            null,
+            'Ce compte est connecté, mais n’est pas autorisé comme enseignant. Vérifie que son adresse figure dans hub_teacher_access dans Supabase.'
+          );
+          await chargerProfilEleve(session);
+        }
+      } catch (error) {
+        basculerOngletEnseignant('account');
+        eleveConnecte = null;
+        resultats = [];
+        document.getElementById('student-space').hidden = true;
+        rendreTableauResultats();
+        const detail = detailErreur(error);
+        afficherEtatAuthentification(null, `Impossible de vérifier le compte enseignant : ${detail}`);
+        document.getElementById('student-auth-status').textContent =
+          `Impossible de vérifier ta session : ${detail}`;
+      }
+    }
+
+    async function connecterEnseignant(event) {
+      event.preventDefault();
+      const formulaire = event.currentTarget;
+      const email = document.getElementById('teacher-email').value.trim().toLocaleLowerCase('fr');
+      const passwordInput = document.getElementById('teacher-password');
+      const password = passwordInput.value;
+      const bouton = formulaire.querySelector('button[type="submit"]');
+      const statut = document.getElementById('teacher-auth-status');
+      if (!supabaseClient) {
+        statut.textContent = supabaseConfigurationErreur;
+        return;
+      }
+
+      bouton.disabled = true;
+      statut.textContent = 'Vérification des identifiants…';
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        statut.textContent = 'Vérification des droits enseignants…';
+        const { data: estAutorise, error: authorizationError } =
+          await supabaseClient.rpc('is_hub_teacher');
+        if (authorizationError) {
+          await supabaseClient.auth.signOut();
+          await actualiserSessionEnseignant(null);
+          throw new Error(`Impossible de vérifier les droits enseignants : ${detailErreur(authorizationError)}`);
+        }
+        if (estAutorise !== true) {
+          await supabaseClient.auth.signOut();
+          await actualiserSessionEnseignant(null);
+          passwordInput.value = '';
+          statut.textContent =
+            'Connexion refusée : cette adresse ne figure pas dans hub_teacher_access et ne possède pas les droits enseignants.';
+          return;
+        }
+
+        passwordInput.value = '';
+        statut.textContent = 'Compte enseignant autorisé. Chargement de l’espace…';
+        await actualiserSessionEnseignant(data.session);
+        if (!enseignantConnecte) {
+          throw new Error('La session a été ouverte, mais l’accès enseignant n’a pas pu être activé.');
+        }
+      } catch (error) {
+        passwordInput.value = '';
+        const detail = detailErreur(error);
+        statut.textContent = `Connexion enseignant impossible : ${detail}`;
+      } finally {
+        bouton.disabled = false;
+      }
+    }
+
+    async function connecterEleve(event) {
+      event.preventDefault();
+      const statut = document.getElementById('student-auth-status');
+      const formulaire = event.currentTarget;
+      const bouton = formulaire.querySelector('button[type="submit"]');
+      if (!supabaseClient) {
+        statut.textContent = supabaseConfigurationErreur;
+        return;
+      }
+
+      const email = document.getElementById('student-email').value.trim().toLocaleLowerCase('fr');
+      const password = document.getElementById('student-password').value;
+      bouton.disabled = true;
+      statut.textContent = 'Connexion en cours…';
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        document.getElementById('student-password').value = '';
+        await actualiserSessionEnseignant(data.session);
+        if (eleveConnecte) formulaire.reset();
+      } catch (error) {
+        statut.textContent = `Connexion refusée : ${detailErreur(error)}`;
+      } finally {
+        bouton.disabled = false;
+      }
+    }
+
+    async function envoyerLienReinitialisation() {
+      const emailInput = document.getElementById('student-email');
+      const statut = document.getElementById('student-auth-status');
+      if (!emailInput.value.trim() || !emailInput.checkValidity()) {
+        emailInput.reportValidity();
+        statut.textContent = 'Saisis d’abord ton adresse e-mail scolaire pour recevoir le lien.';
+        return;
+      }
+      if (!supabaseClient) {
+        statut.textContent = supabaseConfigurationErreur;
+        return;
+      }
+      if (!['http:', 'https:'].includes(window.location.protocol)) {
+        statut.textContent = 'La réinitialisation fonctionne depuis le site publié en HTTPS, pas depuis un fichier ouvert directement sur l’ordinateur.';
+        return;
+      }
+
+      const bouton = document.querySelector('#student-form button[onclick="envoyerLienReinitialisation()"]');
+      bouton.disabled = true;
+      statut.textContent = 'Envoi du lien de réinitialisation…';
+      try {
+        const redirectTo = `${window.location.origin}${window.location.pathname}`;
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(
+          emailInput.value.trim().toLocaleLowerCase('fr'),
+          { redirectTo }
+        );
+        if (error) throw error;
+        statut.textContent = 'Si un compte existe pour cette adresse, un e-mail contenant le lien de réinitialisation va être envoyé. Vérifie aussi les courriers indésirables.';
+      } catch (error) {
+        statut.textContent = `Impossible d’envoyer le lien : ${detailErreur(error)}. Vérifie les URL de redirection autorisées dans Supabase.`;
+      } finally {
+        bouton.disabled = false;
+      }
+    }
+
+    function afficherFormulaireNouveauMotDePasse() {
+      modeReinitialisationMotDePasse = true;
+      document.getElementById('landing').hidden = false;
+      document.getElementById('student-form').hidden = true;
+      document.getElementById('student-password-reset-form').hidden = false;
+      document.getElementById('student-password-reset-status').textContent =
+        'Choisis ton nouveau mot de passe ChronoQuest.';
+      document.getElementById('student-new-password').focus();
+    }
+
+    async function enregistrerNouveauMotDePasse(event) {
+      event.preventDefault();
+      const nouveauMotDePasse = document.getElementById('student-new-password').value;
+      const confirmation = document.getElementById('student-new-password-confirm').value;
+      const statut = document.getElementById('student-password-reset-status');
+      const bouton = event.currentTarget.querySelector('button[type="submit"]');
+      if (nouveauMotDePasse !== confirmation) {
+        statut.textContent = 'Les deux mots de passe ne correspondent pas.';
+        return;
+      }
+      if (!supabaseClient) {
+        statut.textContent = supabaseConfigurationErreur;
+        return;
+      }
+
+      bouton.disabled = true;
+      statut.textContent = 'Enregistrement du nouveau mot de passe…';
+      try {
+        const { error } = await supabaseClient.auth.updateUser({ password: nouveauMotDePasse });
+        if (error) throw error;
+        modeReinitialisationMotDePasse = false;
+        event.currentTarget.reset();
+        event.currentTarget.hidden = true;
+        document.getElementById('student-form').hidden = false;
+        document.getElementById('student-auth-status').textContent =
+          'Ton mot de passe a été modifié. Tu peux maintenant te connecter.';
+        window.history.replaceState(null, document.title, window.location.pathname);
+        const { data, error: sessionError } = await supabaseClient.auth.getSession();
+        if (sessionError) throw sessionError;
+        await actualiserSessionEnseignant(data.session);
+      } catch (error) {
+        statut.textContent = `Impossible de modifier le mot de passe : ${detailErreur(error)}. Demande un nouveau lien de réinitialisation si celui-ci a expiré.`;
+      } finally {
+        bouton.disabled = false;
+      }
+    }
+
+    async function deconnecterEleve() {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) {
+        document.getElementById('student-auth-status').textContent =
+          `Échec de la déconnexion : ${error.message}`;
+        return;
+      }
+      await actualiserSessionEnseignant(null);
+      activerVueTest('landing');
+    }
+
+    async function deconnecterEnseignant() {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) {
+        document.getElementById('teacher-auth-status').textContent =
+          `Échec de la déconnexion : ${error.message}`;
+        return;
+      }
+      await actualiserSessionEnseignant(null);
+      activerVueTest('landing');
+    }
+
+    async function initialiserSupabase() {
+      const configuration = window.CHRONOQUEST_SUPABASE;
+      if (!configuration || typeof configuration.url !== 'string' ||
+          typeof configuration.anonKey !== 'string' ||
+          !configuration.url.startsWith('https://') ||
+          configuration.url.includes('YOUR_') || configuration.anonKey.includes('YOUR_')) {
+        mettreAJourStatutSupabase(supabaseConfigurationErreur);
+        afficherEtatAuthentification(null, supabaseConfigurationErreur);
+        return;
+      }
+      if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+        supabaseConfigurationErreur = 'La bibliothèque Supabase est indisponible. Vérifie ta connexion internet.';
+        mettreAJourStatutSupabase(supabaseConfigurationErreur);
+        afficherEtatAuthentification(null, supabaseConfigurationErreur);
+        return;
+      }
+
+      supabaseClient = window.supabase.createClient(configuration.url, configuration.anonKey);
+      supabaseConfigurationErreur = '';
+      mettreAJourStatutSupabase('Supabase est configuré. Les comptes élèves, résultats et missions seront synchronisés.');
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          afficherFormulaireNouveauMotDePasse();
+          return;
+        }
+        if (modeReinitialisationMotDePasse) return;
+        window.setTimeout(() => { void actualiserSessionEnseignant(session); }, 0);
+      });
+
+      try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
+        if (new URLSearchParams(window.location.hash.slice(1)).get('type') === 'recovery') {
+          afficherFormulaireNouveauMotDePasse();
+        } else {
+          await actualiserSessionEnseignant(data.session);
+        }
+      } catch (error) {
+        const detail = detailErreur(error);
+        document.getElementById('teacher-auth-status').textContent =
+          `Impossible de vérifier la session enseignant : ${detail}`;
+      }
+      await chargerQuetesDistant();
+    }
+
+    function mettreAJourStatutSupabase(message) {
+      const statut = document.getElementById('supabase-storage-status');
+      if (statut) statut.textContent = message;
+    }
+
+    function normaliserReponses(reponses) {
+      if (reponses === undefined) return null;
+      let json;
+      try {
+        json = JSON.stringify(reponses);
+      } catch {
+        throw new Error('Les réponses transmises ne peuvent pas être enregistrées en JSON.');
+      }
+      if (json === undefined || json.length > 20000) {
+        throw new Error('Les réponses sont absentes ou dépassent la limite de 20 Ko.');
+      }
+      return JSON.parse(json);
+    }
+
+    function normaliserCompetences(donnees = {}) {
+      const competences = {};
+      COMPETENCE_KEYS.forEach(cle => {
+        const valeur = donnees[cle] ?? (ANCIENNES_COMPETENCES[cle]
+          ? donnees[ANCIENNES_COMPETENCES[cle]]
+          : undefined);
+        if (valeur === undefined || valeur === null) {
+          competences[cle] = null;
+        } else if (typeof valeur === 'number' && Number.isFinite(valeur) &&
+            valeur >= 0 && valeur <= 100) {
+          competences[cle] = valeur;
+        } else {
+          throw new Error(`La valeur de la compétence ${cle} doit être comprise entre 0 et 100.`);
+        }
+      });
+      return competences;
+    }
+
+    async function enregistrerDansSupabase(resultat, reponses, source) {
+      if (!supabaseClient) {
+        return { enregistre: false, erreur: supabaseConfigurationErreur };
+      }
+      try {
+        const { error } = await supabaseClient.from('student_responses').insert({
+          student_id: source === 'game' ? eleveConnecte?.id : null,
+          student_email: resultat.email,
+          student_name: resultat.name,
+          classroom: resultat.classroom,
+          quest_id: String(resultat.questId),
+          quest_title: resultat.title,
+          score: resultat.score,
+          max_score: resultat.maxScore,
+          score_percent: resultat.scorePercent,
+          competencies: resultat.competencies,
+          answers: reponses,
+          source
+        });
+        if (error) throw error;
+        mettreAJourStatutSupabase('Dernier enregistrement : succès. Consulte la table student_responses dans Supabase.');
+        return { enregistre: true, erreur: '' };
+      } catch (error) {
+        const detail = error && typeof error.message === 'string'
+          ? error.message
+          : String(error);
+        const message = `Échec de l’enregistrement Supabase : ${detail}`;
+        mettreAJourStatutSupabase(message);
+        return { enregistre: false, erreur: message };
+      }
+    }
+
+    function lireListeEleves() {
+      return Array.from(document.querySelectorAll('#roster-table tbody tr'))
+        .map(row => {
+          const cells = Array.from(row.cells, cell => cell.textContent.trim());
+          return { email: cells[0] || '', name: cells[1] || '', classroom: cells[2] || '' };
+        })
+        .filter(eleve => eleve.email && eleve.classroom);
+    }
+
+    function afficherListeEleves(eleves) {
+      const corps = document.querySelector('#roster-table tbody');
+      corps.replaceChildren();
+      eleves.forEach(eleve => {
+        const ligne = document.createElement('tr');
+        [eleve.email, eleve.name, eleve.classroom].forEach(valeur => {
+          const cellule = document.createElement('td');
+          cellule.textContent = valeur;
+          ligne.appendChild(cellule);
+        });
+        corps.appendChild(ligne);
+      });
+      actualiserChoixClasses();
+      mettreAJourSelecteurResultats();
+      actualiserSelecteurReinitialisation();
+      actualiserFiltreClasseResultats();
+      actualiserFiltreMissionResultats();
+      actualiserSelecteurHistoriqueEleves();
+      rendreTableauEnseignant();
+    }
+
+    function actualiserSelecteurReinitialisation() {
+      const selecteur = document.getElementById('reset-student-email');
+      if (!selecteur) return;
+      const selection = selecteur.value;
+      selecteur.replaceChildren();
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Choisir un élève';
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      selecteur.appendChild(placeholder);
+
+      lireListeEleves().forEach(eleve => {
+        const option = document.createElement('option');
+        option.value = eleve.email.toLocaleLowerCase('fr');
+        option.textContent = `${eleve.name} — ${eleve.email}`;
+        option.selected = option.value === selection;
+        selecteur.appendChild(option);
+      });
+      selecteur.disabled = !enseignantConnecte || selecteur.options.length < 2;
+    }
+
+    async function chargerListeElevesDistant() {
+      if (!supabaseClient || !enseignantConnecte) return;
+      const { data, error } = await supabaseClient.from('student_roster')
+        .select('email,name,classroom')
+        .order('email');
+      if (error) {
+        document.getElementById('teacher-auth-status').textContent =
+          `Impossible de charger la liste des élèves : ${detailErreur(error)}`;
+        return;
+      }
+      afficherListeEleves(data || []);
+    }
+
+    function effacerMotDePasseTemporaire() {
+      document.getElementById('reset-student-password').value = '';
+      document.getElementById('reset-student-password-confirm').value = '';
+      document.getElementById('reset-student-password').type = 'password';
+      document.getElementById('reset-student-password-confirm').type = 'password';
+      document.getElementById('reset-password-visibility').textContent = 'Afficher';
+      document.getElementById('teacher-reset-password-status').textContent = '';
+    }
+
+    function basculerVisibiliteMotDePasseTemporaire() {
+      const motDePasse = document.getElementById('reset-student-password');
+      const confirmation = document.getElementById('reset-student-password-confirm');
+      const afficher = motDePasse.type === 'password';
+      motDePasse.type = afficher ? 'text' : 'password';
+      confirmation.type = afficher ? 'text' : 'password';
+      document.getElementById('reset-password-visibility').textContent =
+        afficher ? 'Masquer' : 'Afficher';
+    }
+
+    function genererMotDePasseTemporaire() {
+      const statut = document.getElementById('teacher-reset-password-status');
+      if (!document.getElementById('reset-student-email').value) {
+        statut.textContent = 'Choisis d’abord un élève.';
+        return;
+      }
+      if (!window.crypto || typeof window.crypto.getRandomValues !== 'function') {
+        statut.textContent = 'La génération sécurisée de mot de passe n’est pas disponible dans ce navigateur.';
+        return;
+      }
+
+      const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%_-';
+      const longueur = 20;
+      const limite = 256 - (256 % alphabet.length);
+      const octets = new Uint8Array(32);
+      let motDePasse = '';
+      while (motDePasse.length < longueur) {
+        window.crypto.getRandomValues(octets);
+        for (const valeur of octets) {
+          if (valeur >= limite) continue;
+          motDePasse += alphabet[valeur % alphabet.length];
+          if (motDePasse.length === longueur) break;
+        }
+      }
+
+      document.getElementById('reset-student-password').value = motDePasse;
+      document.getElementById('reset-student-password-confirm').value = motDePasse;
+      document.getElementById('reset-student-password').type = 'text';
+      document.getElementById('reset-student-password-confirm').type = 'text';
+      document.getElementById('reset-password-visibility').textContent = 'Masquer';
+      statut.textContent = 'Mot de passe individuel généré. Valide la réinitialisation pour l’appliquer.';
+    }
+
+    async function reinitialiserMotDePasseEleve(event) {
+      event.preventDefault();
+      if (!enseignantConnecte || !supabaseClient) {
+        document.getElementById('teacher-reset-password-status').textContent =
+          'Action réservée au compte enseignant autorisé.';
+        return;
+      }
+      const statut = document.getElementById('teacher-reset-password-status');
+      const formulaire = event.currentTarget;
+      const bouton = formulaire.querySelector('button[type="submit"]');
+      const email = document.getElementById('reset-student-email').value;
+      const password = document.getElementById('reset-student-password').value;
+      const confirmation = document.getElementById('reset-student-password-confirm').value;
+
+      if (!enseignantConnecte || !supabaseClient) {
+        statut.textContent = 'Connecte-toi avec le compte enseignant autorisé.';
+        return;
+      }
+      if (!lireListeEleves().some(eleve => eleve.email.toLocaleLowerCase('fr') === email)) {
+        statut.textContent = 'Choisis un élève présent dans la liste importée.';
+        return;
+      }
+      if (password.length < 12 || password.length > 128) {
+        statut.textContent = 'Le mot de passe doit contenir entre 12 et 128 caractères.';
+        return;
+      }
+      if (password !== confirmation) {
+        statut.textContent = 'Les deux mots de passe ne correspondent pas.';
+        return;
+      }
+
+      bouton.disabled = true;
+      statut.textContent = 'Réinitialisation en cours…';
+      try {
+        const { data, error } = await supabaseClient.functions.invoke(
+          'reset-student-password',
+          { body: { email, password } }
+        );
+        if (error) throw error;
+        if (!data || data.success !== true) {
+          throw new Error(data?.error || 'Le serveur n’a pas confirmé la réinitialisation.');
+        }
+        formulaire.reset();
+        document.getElementById('reset-student-password').type = 'password';
+        document.getElementById('reset-student-password-confirm').type = 'password';
+        document.getElementById('reset-password-visibility').textContent = 'Afficher';
+        statut.textContent = `Le mot de passe de ${email} a été réinitialisé. Transmets-le à l’élève par un canal privé.`;
+      } catch (error) {
+        statut.textContent = `Échec de la réinitialisation : ${detailErreur(error)}. Vérifie que la fonction serveur est déployée.`;
+      } finally {
+        bouton.disabled = false;
+      }
+    }
+
+    async function chargerProfilEleve(session) {
+      const statut = document.getElementById('student-auth-status');
+      const email = session.user.email?.trim().toLocaleLowerCase('fr');
+      if (!email) {
+        eleveConnecte = null;
+        statut.textContent = 'Ce compte ne possède pas d’adresse e-mail vérifiée.';
+        return;
+      }
+
+      const { data, error } = await supabaseClient.from('student_roster')
+        .select('email,name,classroom')
+        .eq('email', email)
+        .maybeSingle();
+      if (error) {
+        eleveConnecte = null;
+        statut.textContent = `Impossible de charger ton profil élève : ${detailErreur(error)}`;
+        return;
+      }
+      if (!data) {
+        eleveConnecte = null;
+        statut.textContent = 'Cette adresse ne figure pas dans la liste des élèves autorisés. Demande à ton enseignante de vérifier la liste.';
+        document.getElementById('student-space').hidden = true;
+        activerVueTest('landing');
+        return;
+      }
+
+      eleveConnecte = {
+        id: session.user.id,
+        email: data.email,
+        name: data.name,
+        classroom: data.classroom
+      };
+      actualiserBoutonEspaceEleve();
+      statut.textContent = '';
+      afficherIdentiteEleve();
+      activerVueTest('student-space');
+      await chargerResultatsEleve();
+    }
+
+    async function chargerResultatsEleve() {
+      if (!supabaseClient || !eleveConnecte) return;
+      const { data, error } = await supabaseClient.from('student_responses')
+        .select('student_email,student_name,classroom,quest_id,quest_title,score,max_score,score_percent,competencies,created_at')
+        .eq('student_id', eleveConnecte.id)
+        .order('created_at', { ascending: false });
+      if (error) {
+        document.getElementById('student-auth-status').textContent =
+          `Impossible de charger ton bilan : ${detailErreur(error)}`;
+        return;
+      }
+
+      const derniersResultats = new Map();
+      (data || []).forEach(ligne => {
+        const cle = `${ligne.student_email.toLocaleLowerCase('fr')}:${ligne.quest_id}`;
+        if (!derniersResultats.has(cle)) derniersResultats.set(cle, ligne);
+      });
+      resultats = [...derniersResultats.values()].map(ligne => ({
+        email: ligne.student_email,
+        name: ligne.student_name,
+        classroom: ligne.classroom,
+        questId: ligne.quest_id,
+        title: ligne.quest_title,
+        score: ligne.score === null ? null : Number(ligne.score),
+        maxScore: ligne.max_score === null ? null : Number(ligne.max_score),
+        scorePercent: ligne.score_percent === null ? null : Number(ligne.score_percent),
+        competencies: ligne.competencies || {}
+      }));
+      rendreTableauResultats();
+    }
+
+    async function chargerResultatsEnseignant() {
+      if (!supabaseClient || !enseignantConnecte) return;
+      const toutesLesLignes = [];
+      const taillePage = 1000;
+      for (let debut = 0; ; debut += taillePage) {
+        const { data, error } = await supabaseClient.from('student_responses')
+          .select('student_email,student_name,classroom,quest_id,quest_title,score,max_score,score_percent,competencies,created_at')
+          .order('created_at', { ascending: false })
+          .range(debut, debut + taillePage - 1);
+        if (error) {
+          document.getElementById('teacher-auth-status').textContent =
+            `Impossible de charger les résultats : ${detailErreur(error)}`;
+          return;
+        }
+        const page = data || [];
+        toutesLesLignes.push(...page);
+        if (page.length < taillePage) break;
+      }
+
+      const derniersResultats = new Map();
+      toutesLesLignes.forEach(ligne => {
+        const cle = `${ligne.student_email.toLocaleLowerCase('fr')}:${ligne.quest_id}`;
+        if (!derniersResultats.has(cle)) derniersResultats.set(cle, ligne);
+      });
+      resultats = [...derniersResultats.values()].map(ligne => ({
+        email: ligne.student_email,
+        name: ligne.student_name,
+        classroom: ligne.classroom,
+        questId: ligne.quest_id,
+        title: ligne.quest_title,
+        score: ligne.score === null ? null : Number(ligne.score),
+        maxScore: ligne.max_score === null ? null : Number(ligne.max_score),
+        scorePercent: ligne.score_percent === null ? null : Number(ligne.score_percent),
+        competencies: ligne.competencies || {}
+      }));
+      actualiserFiltreClasseResultats();
+      actualiserFiltreMissionResultats();
+      actualiserSelecteurHistoriqueEleves();
+      rendreTableauEnseignant();
+    }
+
+    function actualiserFiltreClasseResultats() {
+      const selecteur = document.getElementById('teacher-class-filter');
+      if (!selecteur) return;
+      const ancienneClasse = selecteur.value || '*';
+      const classes = new Set([
+        ...classesDisponibles(),
+        ...resultats.map(resultat => resultat.classroom).filter(Boolean)
+      ]);
+      selecteur.replaceChildren();
+
+      const toutesLesClasses = document.createElement('option');
+      toutesLesClasses.value = '*';
+      toutesLesClasses.textContent = 'Toutes les classes';
+      selecteur.appendChild(toutesLesClasses);
+      [...classes]
+        .sort((a, b) => a.localeCompare(b, 'fr', { numeric: true, sensitivity: 'base' }))
+        .forEach(classe => {
+          const option = document.createElement('option');
+          option.value = classe;
+          option.textContent = classe;
+          selecteur.appendChild(option);
+        });
+      selecteur.value = classes.has(ancienneClasse) || ancienneClasse === '*' ? ancienneClasse : '*';
+    }
+
+    function actualiserFiltreMissionResultats() {
+      const selecteur = document.getElementById('teacher-quest-filter');
+      if (!selecteur) return;
+      const ancienneMission = selecteur.value || '*';
+      const missions = new Map();
+      meQuetes.forEach(quete => missions.set(String(quete.id), quete.title));
+      resultats.forEach(resultat => {
+        const id = String(resultat.questId);
+        if (!missions.has(id)) missions.set(id, resultat.title || id);
+      });
+
+      selecteur.replaceChildren();
+      const toutesLesMissions = document.createElement('option');
+      toutesLesMissions.value = '*';
+      toutesLesMissions.textContent = 'Toutes les missions';
+      selecteur.appendChild(toutesLesMissions);
+      [...missions.entries()]
+        .sort((a, b) => a[1].localeCompare(b[1], 'fr', { sensitivity: 'base' }))
+        .forEach(([id, titre]) => {
+          const option = document.createElement('option');
+          option.value = id;
+          option.textContent = titre;
+          selecteur.appendChild(option);
+        });
+      selecteur.value = missions.has(ancienneMission) || ancienneMission === '*'
+        ? ancienneMission
+        : '*';
+    }
+
+    function actualiserSelecteurHistoriqueEleves() {
+      const selecteur = document.getElementById('teacher-history-student');
+      if (!selecteur) return;
+      const ancienneSelection = selecteur.value;
+      const elevesParEmail = new Map();
+      lireListeEleves().forEach(eleve => {
+        elevesParEmail.set(eleve.email.toLocaleLowerCase('fr'), { ...eleve });
+      });
+      resultats.forEach(resultat => {
+        if (!resultat.email) return;
+        const cle = resultat.email.toLocaleLowerCase('fr');
+        const eleve = elevesParEmail.get(cle) || {
+          email: resultat.email,
+          name: '',
+          classroom: ''
+        };
+        if (!eleve.name) eleve.name = resultat.name || '';
+        if (!eleve.classroom) eleve.classroom = resultat.classroom || '';
+        elevesParEmail.set(cle, eleve);
+      });
+
+      selecteur.replaceChildren();
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = elevesParEmail.size
+        ? 'Choisir un élève'
+        : 'Aucun élève trouvé — importe la liste des élèves';
+      selecteur.appendChild(placeholder);
+
+      [...elevesParEmail.values()]
+        .sort((a, b) =>
+          String(a.classroom || '').localeCompare(String(b.classroom || ''), 'fr', { numeric: true, sensitivity: 'base' }) ||
+          String(a.name || '').localeCompare(String(b.name || ''), 'fr', { sensitivity: 'base' })
+        )
+        .forEach(eleve => {
+          const option = document.createElement('option');
+          option.value = eleve.email;
+          const nom = eleve.name || eleve.email;
+          const prenom = prenomDepuisEmail(eleve.email);
+          const nomComplet = prenom === '—' ? nom : `${nom} (${prenom})`;
+          option.textContent = `${nomComplet} — ${eleve.classroom || 'Classe inconnue'}`;
+          option.selected = eleve.email.toLocaleLowerCase('fr') ===
+            ancienneSelection.toLocaleLowerCase('fr');
+          selecteur.appendChild(option);
+        });
+      selecteur.value = selecteur.value || '';
+      selecteur.disabled = selecteur.options.length < 2;
+    }
+
+    function classesDisponibles() {
+      return [...new Set(lireListeEleves().map(eleve => eleve.classroom))]
+        .sort((a, b) => a.localeCompare(b, 'fr', { numeric: true, sensitivity: 'base' }));
+    }
+
+    function actualiserChoixClasses(classesSelectionnees = null) {
+      const conteneur = document.getElementById('q-class-options');
+      const ancienneSelection = classesSelectionnees || Array.from(
+        conteneur.querySelectorAll('input:checked'),
+        input => input.value
+      );
+      const classes = classesDisponibles();
+      const selectionValide = ancienneSelection.filter(classe => classe === '*' || classes.includes(classe));
+      const selectionToutes = selectionValide.length === 0 || selectionValide.includes('*');
+      conteneur.replaceChildren();
+
+      const ajouterChoix = (valeur, texte, coche = false) => {
+        const label = document.createElement('label');
+        label.className = 'class-option';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'q-class';
+        checkbox.value = valeur;
+        checkbox.checked = coche;
+        const nom = document.createElement('span');
+        nom.textContent = texte;
+        label.append(checkbox, nom);
+        conteneur.appendChild(label);
+        return checkbox;
+      };
+
+      const toutes = ajouterChoix('*', 'Toutes les classes', selectionToutes);
+      classes.forEach(classe => {
+        ajouterChoix(classe, classe, !selectionToutes && selectionValide.includes(classe));
+      });
+
+      conteneur.onchange = event => {
+        const choix = event.target;
+        if (!(choix instanceof HTMLInputElement)) return;
+        if (choix === toutes && choix.checked) {
+          conteneur.querySelectorAll('input:not([value="*"])').forEach(input => { input.checked = false; });
+        } else if (choix.value !== '*' && choix.checked) {
+          toutes.checked = false;
+        }
+      };
+
+      if (classes.length === 0) {
+        const aide = document.createElement('small');
+        aide.className = 'class-options-empty';
+        aide.textContent = 'Importe d’abord la liste des élèves pour choisir des classes précises.';
+        conteneur.appendChild(aide);
+      }
+    }
+
+    function classesCibles(quete) {
+      const selection = quete.classrooms || quete.classroom || ['*'];
+      return Array.isArray(selection) ? selection : [selection];
+    }
+
+    function nomClassesCibles(quete) {
+      const classes = classesCibles(quete);
+      return classes.includes('*') ? 'Toutes les classes' : classes.join(', ');
+    }
+
+    function normaliserClasse(classe) {
+      return String(classe || '').trim().toLocaleLowerCase('fr');
+    }
+
+    function queteVisiblePourEleve(quete) {
+      return modeApercuEnseignant ||
+        classesCibles(quete).includes('*') ||
+        classesCibles(quete).some(classe => normaliserClasse(classe) === normaliserClasse(eleveConnecte?.classroom));
+    }
+
+    function afficherIdentiteEleve() {
+      if (!eleveConnecte) return;
+      document.getElementById('greeting').textContent = eleveConnecte.name
+        ? `Salut, ${eleveConnecte.name} !`
+        : 'Salut, aventurier !';
+      document.getElementById('student-class').textContent = `Ta classe : ${eleveConnecte.classroom}`;
+    }
+
+    function lettreResultat(pourcentage) {
+      if (pourcentage >= 90) return 'A';
+      if (pourcentage >= 75) return 'B';
+      if (pourcentage >= 60) return 'C';
+      if (pourcentage >= 50) return 'D';
+      return 'E';
+    }
+
+    function badgeResultat(pourcentage) {
+      const badge = document.createElement('span');
+      if (pourcentage === null || pourcentage === undefined) {
+        badge.className = 'grade-badge grade-missing';
+        badge.textContent = '—';
+        badge.setAttribute('aria-label', 'Résultat non renseigné');
+        return badge;
+      }
+
+      const lettre = lettreResultat(pourcentage);
+      badge.className = `grade-badge grade-${lettre.toLowerCase()}`;
+      badge.textContent = lettre;
+      badge.title = `${Math.round(pourcentage)} %`;
+      badge.setAttribute('aria-label', `${lettre}, ${Math.round(pourcentage)} %`);
+      return badge;
+    }
+
+    function ajouterCellule(ligne, contenu, entete = false) {
+      const cellule = document.createElement(entete ? 'th' : 'td');
+      if (entete) cellule.scope = 'row';
+      if (contenu instanceof Node) cellule.appendChild(contenu);
+      else cellule.textContent = contenu;
+      ligne.appendChild(cellule);
+      return cellule;
+    }
+
+    function rendreTableauResultats() {
+      const propresResultats = resultats
+        .filter(resultat => eleveConnecte &&
+          resultat.email.toLocaleLowerCase('fr') === eleveConnecte.email.toLocaleLowerCase('fr'))
+        .sort((a, b) => a.title.localeCompare(b.title, 'fr'));
+      const corps = document.getElementById('student-results-body');
+      corps.replaceChildren();
+
+      propresResultats.forEach(resultat => {
+        const ligne = document.createElement('tr');
+        ajouterCellule(ligne, resultat.title, true);
+        const score = document.createElement('div');
+        score.textContent = `${resultat.score} / ${resultat.maxScore}`;
+        score.appendChild(badgeResultat(resultat.scorePercent));
+        ajouterCellule(ligne, score);
+        COMPETENCE_KEYS.forEach(competence => {
+          const valeur = resultat.competencies[competence];
+          const cellule = document.createElement('div');
+          if (valeur !== null && valeur !== undefined) {
+            cellule.append(`${Math.round(valeur)} % `);
+          }
+          cellule.appendChild(badgeResultat(valeur));
+          ajouterCellule(ligne, cellule);
+        });
+        corps.appendChild(ligne);
+      });
+
+      document.getElementById('student-results-empty').hidden = propresResultats.length > 0;
+    }
+
+    function mettreAJourSelecteurResultats() {
+      const elevesSelect = document.getElementById('result-student');
+      const quetesSelect = document.getElementById('result-quest');
+      const remplir = (selecteur, elements, etiquetteVide, valeur, libelle) => {
+        selecteur.replaceChildren();
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = etiquetteVide;
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        selecteur.appendChild(placeholder);
+        elements.forEach(element => {
+          const option = document.createElement('option');
+          option.value = valeur(element);
+          option.textContent = libelle(element);
+          selecteur.appendChild(option);
+        });
+        selecteur.disabled = elements.length === 0;
+      };
+
+      remplir(elevesSelect, lireListeEleves(), 'Choisir un élève', eleve => eleve.email,
+        eleve => `${eleve.name} — ${eleve.classroom}`);
+      remplir(quetesSelect, meQuetes, 'Choisir une mission', quete => quete.id, quete => quete.title);
+    }
+
+    function enregistrerResultat(resultat) {
+      const index = resultats.findIndex(existant =>
+        existant.email.toLocaleLowerCase('fr') === resultat.email.toLocaleLowerCase('fr') &&
+        String(existant.questId) === String(resultat.questId)
+      );
+      if (index >= 0) resultats[index] = resultat;
+      else resultats.push(resultat);
+      actualiserFiltreClasseResultats();
+      actualiserFiltreMissionResultats();
+      rendreTableauResultats();
+      rendreTableauEnseignant();
+    }
+
+    function lirePourcentageInput(id) {
+      const champ = document.getElementById(id);
+      return champ.value === '' ? null : Number(champ.value);
+    }
+
+    async function enregistrerResultatEnseignant(event) {
+      event.preventDefault();
+      const email = document.getElementById('result-student').value;
+      const quete = meQuetes.find(item => String(item.id) === document.getElementById('result-quest').value);
+      const score = Number(document.getElementById('result-score').value);
+      if (!email || !quete || !Number.isFinite(score) || score < 0 || score > 20) {
+        alert('Choisis un élève, une mission et une note valide sur 20.');
+        return;
+      }
+
+      const eleve = lireListeEleves().find(item => item.email.toLocaleLowerCase('fr') === email.toLocaleLowerCase('fr'));
+      if (!eleve) {
+        alert('Cet élève n’est plus présent dans la liste importée.');
+        return;
+      }
+      const competencies = {
+        C1: lirePourcentageInput('result-c1'),
+        C2: lirePourcentageInput('result-c2'),
+        C3: lirePourcentageInput('result-c3'),
+        C4: lirePourcentageInput('result-c4')
+      };
+      const resultat = {
+        email: eleve.email,
+        name: eleve.name,
+        classroom: eleve.classroom,
+        questId: quete.id,
+        title: quete.title,
+        score,
+        maxScore: 20,
+        scorePercent: score * 5,
+        competencies
+      };
+      enregistrerResultat(resultat);
+      const sauvegarde = await enregistrerDansSupabase(resultat, null, 'teacher');
+      const emailHistorique = document.getElementById('teacher-history-student').value;
+      if (sauvegarde.enregistre &&
+          emailHistorique.toLocaleLowerCase('fr') === eleve.email.toLocaleLowerCase('fr')) {
+        await chargerHistoriqueEleveEnseignant();
+      }
+      event.currentTarget.reset();
+      alert(sauvegarde.enregistre
+        ? 'Résultat enregistré dans Supabase et visible dans le bilan de cet élève.'
+        : `Résultat conservé dans cette session, mais pas dans Supabase. ${sauvegarde.erreur}`);
+    }
+
+    function prenomDepuisEmail(email) {
+      const partieLocale = String(email || '').split('@')[0] || '';
+      const morceaux = partieLocale.split('.');
+      if (morceaux.length < 2 || !morceaux[morceaux.length - 1]) return '—';
+      const prenom = morceaux[morceaux.length - 1];
+      return prenom.charAt(0).toLocaleUpperCase('fr') + prenom.slice(1);
+    }
+
+    function basculerVueResultatsEnseignant(vue) {
+      const missionActive = vue !== 'student';
+      const ongletMission = document.getElementById('teacher-results-mission-tab');
+      const ongletEleve = document.getElementById('teacher-results-student-tab');
+      ongletMission.classList.toggle('selected', missionActive);
+      ongletEleve.classList.toggle('selected', !missionActive);
+      ongletMission.setAttribute('aria-selected', String(missionActive));
+      ongletEleve.setAttribute('aria-selected', String(!missionActive));
+      document.getElementById('teacher-results-by-mission').hidden = !missionActive;
+      document.getElementById('teacher-results-by-student').hidden = missionActive;
+    }
+
+    async function chargerHistoriqueEleveEnseignant() {
+      const selecteur = document.getElementById('teacher-history-student');
+      const corps = document.getElementById('teacher-history-body');
+      const resume = document.getElementById('teacher-history-summary');
+      const email = selecteur.value;
+      corps.replaceChildren();
+      if (!email) {
+        resume.textContent = 'Choisis un élève pour afficher l’historique complet de ses missions.';
+        return;
+      }
+      if (!supabaseClient || !enseignantConnecte) {
+        resume.textContent = 'Connecte-toi avec le compte enseignant autorisé pour consulter l’historique.';
+        return;
+      }
+
+      resume.textContent = 'Chargement de l’historique complet…';
+      const historique = [];
+      const taillePage = 1000;
+      for (let debut = 0; ; debut += taillePage) {
+        const { data, error } = await supabaseClient.from('student_responses')
+          .select('student_email,student_name,classroom,quest_id,quest_title,score,max_score,score_percent,competencies,created_at')
+          .eq('student_email', email)
+          .order('created_at', { ascending: false })
+          .range(debut, debut + taillePage - 1);
+        if (selecteur.value !== email) return;
+        if (error) {
+          resume.textContent = `Impossible de charger l’historique : ${detailErreur(error)}`;
+          return;
+        }
+        const page = data || [];
+        historique.push(...page);
+        if (page.length < taillePage) break;
+      }
+      if (selecteur.value !== email) return;
+
+      historique.forEach(resultat => {
+        const ligne = document.createElement('tr');
+        const date = resultat.created_at ? new Date(resultat.created_at) : null;
+        ajouterCellule(ligne, date && Number.isFinite(date.getTime())
+          ? date.toLocaleString('fr-BE')
+          : '—');
+        ajouterCellule(ligne, resultat.quest_title || String(resultat.quest_id || '—'), true);
+        ajouterCellule(ligne, resultat.classroom || '—');
+        if (resultat.score === null || resultat.score === undefined) {
+          ajouterCellule(ligne, '—');
+        } else {
+          const score = document.createElement('div');
+          score.textContent = `${resultat.score} / ${resultat.max_score} `;
+          score.appendChild(badgeResultat(resultat.score_percent));
+          ajouterCellule(ligne, score);
+        }
+        COMPETENCE_KEYS.forEach(competence => {
+          const valeur = resultat.competencies && resultat.competencies[competence];
+          const cellule = document.createElement('div');
+          if (valeur !== null && valeur !== undefined) cellule.append(`${Math.round(valeur)} % `);
+          cellule.appendChild(badgeResultat(valeur));
+          ajouterCellule(ligne, cellule);
+        });
+        corps.appendChild(ligne);
+      });
+      resume.textContent = historique.length
+        ? `${historique.length} résultat(s) dans l’historique complet de cet élève.`
+        : 'Aucun résultat enregistré pour cet élève.';
+    }
+
+    function rendreTableauEnseignant() {
+      const corps = document.getElementById('teacher-results-body');
+      corps.replaceChildren();
+      const classeChoisie = document.getElementById('teacher-class-filter')?.value || '*';
+      const missionChoisie = document.getElementById('teacher-quest-filter')?.value || '*';
+      const resultatsCorrespondants = resultats
+        .filter(resultat =>
+          (classeChoisie === '*' ||
+            normaliserClasse(resultat.classroom) === normaliserClasse(classeChoisie)) &&
+          (missionChoisie === '*' || String(resultat.questId) === missionChoisie)
+        );
+      const clesResultats = new Set(
+        resultatsCorrespondants.map(resultat =>
+          `${String(resultat.email || '').toLocaleLowerCase('fr')}:${String(resultat.questId)}`
+        )
+      );
+      const resultatsVisibles = [...resultatsCorrespondants];
+      lireListeEleves()
+        .filter(eleve => classeChoisie === '*' ||
+          normaliserClasse(eleve.classroom) === normaliserClasse(classeChoisie))
+        .forEach(eleve => {
+          meQuetes
+            .filter(quete =>
+              (missionChoisie === '*' || String(quete.id) === missionChoisie) &&
+              (classesCibles(quete).includes('*') ||
+                classesCibles(quete).some(classe =>
+                  normaliserClasse(classe) === normaliserClasse(eleve.classroom)
+                ))
+            )
+            .forEach(quete => {
+              const cle = `${String(eleve.email).toLocaleLowerCase('fr')}:${String(quete.id)}`;
+              if (!clesResultats.has(cle)) {
+                resultatsVisibles.push({
+                  email: eleve.email,
+                  name: eleve.name,
+                  classroom: eleve.classroom,
+                  questId: quete.id,
+                  title: quete.title,
+                  score: null,
+                  maxScore: null,
+                  scorePercent: null,
+                  competencies: {}
+                });
+              }
+            });
+        });
+      resultatsVisibles.sort((a, b) =>
+        String(a.classroom || '').localeCompare(String(b.classroom || ''), 'fr', { numeric: true, sensitivity: 'base' }) ||
+        String(a.name || '').localeCompare(String(b.name || ''), 'fr', { sensitivity: 'base' }) ||
+        String(a.title || '').localeCompare(String(b.title || ''), 'fr', { sensitivity: 'base' })
+      );
+
+      resultatsVisibles.forEach(resultat => {
+        const ligne = document.createElement('tr');
+        ajouterCellule(ligne, resultat.name, true);
+        ajouterCellule(ligne, prenomDepuisEmail(resultat.email));
+        ajouterCellule(ligne, resultat.classroom);
+        ajouterCellule(ligne, resultat.title);
+        if (resultat.score === null || resultat.score === undefined) {
+          ajouterCellule(ligne, '—');
+        } else {
+          const score = document.createElement('div');
+          score.textContent = `${resultat.score} / ${resultat.maxScore} `;
+          score.appendChild(badgeResultat(resultat.scorePercent));
+          ajouterCellule(ligne, score);
+        }
+        COMPETENCE_KEYS.forEach(competence => {
+          const valeur = resultat.competencies[competence];
+          const cellule = document.createElement('div');
+          if (valeur !== null && valeur !== undefined) cellule.append(`${Math.round(valeur)} % `);
+          if (resultat.score === null || resultat.score === undefined) {
+            cellule.textContent = '—';
+          } else {
+            cellule.appendChild(badgeResultat(valeur));
+          }
+          ajouterCellule(ligne, cellule);
+        });
+        corps.appendChild(ligne);
+      });
+      const classeTexte = classeChoisie === '*' ? 'toutes les classes' : `la classe ${classeChoisie}`;
+      const mission = meQuetes.find(quete => String(quete.id) === missionChoisie) ||
+        resultats.find(resultat => String(resultat.questId) === missionChoisie);
+      const missionTexte = missionChoisie === '*' ? 'toutes les missions' :
+        `la mission ${mission ? mission.title : missionChoisie}`;
+      const evaluations = resultatsVisibles.filter(resultat =>
+        resultat.score !== null && resultat.score !== undefined
+      ).length;
+      document.getElementById('teacher-results-summary').textContent = resultatsVisibles.length
+        ? `${resultatsVisibles.length} ligne(s) élève-mission pour ${missionTexte} et ${classeTexte}; ${evaluations} résultat(s) enregistré(s). « — » signifie qu’aucun résultat n’est encore disponible.`
+        : `Aucun élève trouvé pour ${missionTexte} et ${classeTexte}. Importe la liste des élèves dans l’onglet correspondant.`;
+    }
+
+    window.addEventListener('message', async event => {
+      const iframe = document.getElementById('game-frame');
+      if (event.source !== iframe.contentWindow) return;
+      const data = event.data;
+      const statut = document.getElementById('game-result-status');
+      if (data && typeof data === 'object' && data.type === 'chronoquest-answer') {
+        const confirmerEnregistrement = (saved, error = '') => {
+          if (typeof data.requestId === 'string') {
+            iframe.contentWindow.postMessage({
+              type: 'chronoquest-answer-saved',
+              requestId: data.requestId,
+              saved,
+              error
+            }, '*');
+          }
+        };
+        if (modeApercuEnseignant) {
+          const erreur = 'Les réponses ne sont pas enregistrées depuis l’aperçu enseignant.';
+          statut.textContent = erreur;
+          confirmerEnregistrement(false, erreur);
+          return;
+        }
+        const niveauValide = Number.isInteger(data.level) && data.level >= 1 && data.level <= 6;
+        const questionValide = Number.isInteger(data.questionNumber) && data.questionNumber > 0;
+        const reponsesValides = typeof data.question === 'string' &&
+          typeof data.studentAnswer === 'string' && typeof data.correctAnswer === 'string' &&
+          typeof data.isCorrect === 'boolean';
+        const scoreValide = typeof data.score === 'number' &&
+          typeof data.maxScore === 'number' && Number.isFinite(data.score) &&
+          Number.isFinite(data.maxScore) && data.maxScore === data.questionNumber &&
+          data.score >= 0 && data.score <= data.maxScore;
+
+        if (!eleveConnecte || !queteEnCours || !niveauValide || !questionValide ||
+            !reponsesValides || !scoreValide) {
+          const erreur = 'Les données de la réponse ou l’identité de l’élève sont invalides.';
+          statut.textContent = `Réponse ChronoRomain non enregistrée : ${erreur}`;
+          confirmerEnregistrement(false, erreur);
+          return;
+        }
+
+        const scorePercent = data.score / data.maxScore * 100;
+        const resultat = {
+          email: eleveConnecte.email,
+          name: eleveConnecte.name,
+          classroom: eleveConnecte.classroom,
+          questId: queteEnCours.id,
+          title: queteEnCours.title,
+          score: data.score,
+          maxScore: data.maxScore,
+          scorePercent,
+          competencies: {
+              C1: null,
+              C2: null,
+              C3: null,
+              C4: null
+          }
+        };
+        const answers = {
+          game: 'ChronoRomain',
+          level: data.level,
+          questionNumber: data.questionNumber,
+          question: data.question,
+          studentAnswer: data.studentAnswer,
+          correctAnswer: data.correctAnswer,
+          isCorrect: data.isCorrect
+        };
+        enregistrerResultat(resultat);
+        const sauvegarde = await enregistrerDansSupabase(resultat, answers, 'game');
+        statut.textContent = sauvegarde.enregistre
+          ? `Réponse ${data.questionNumber} du niveau ${data.level} enregistrée pour ${eleveConnecte.name || 'l’élève'}.`
+          : `Réponse ChronoRomain non sauvegardée. ${sauvegarde.erreur}`;
+        confirmerEnregistrement(sauvegarde.enregistre, sauvegarde.erreur);
+        return;
+      }
+
+      if (!data || typeof data !== 'object' || data.type !== 'chronoquest-result') return;
+      const confirmerEnregistrement = (saved, error = '') => {
+        if (typeof data.requestId === 'string') {
+          iframe.contentWindow.postMessage({
+            type: 'chronoquest-result-saved',
+            requestId: data.requestId,
+            saved,
+            error
+          }, '*');
+        }
+      };
+
+      if (modeApercuEnseignant) {
+        const erreur = 'Les résultats ne sont pas enregistrés depuis l’aperçu enseignant.';
+        statut.textContent = erreur;
+        confirmerEnregistrement(false, erreur);
+        return;
+      }
+
+      if (!eleveConnecte || !queteEnCours || typeof data.score !== 'number' ||
+          typeof data.maxScore !== 'number' || !Number.isFinite(data.score) ||
+          !Number.isFinite(data.maxScore) || data.maxScore <= 0 ||
+          data.score < 0 || data.score > data.maxScore ||
+          (typeof data.gameId === 'string' && data.gameId !== String(queteEnCours.id))) {
+        const erreur = 'vérifie la connexion élève, le jeu et le score transmis.';
+        statut.textContent = `Résultat non enregistré : ${erreur}`;
+        confirmerEnregistrement(false, erreur);
+        return;
+      }
+
+      let competencies;
+      try {
+        const donneesCompetences = data.competencies && typeof data.competencies === 'object'
+          ? data.competencies
+          : {};
+        competencies = normaliserCompetences(donneesCompetences);
+      } catch (error) {
+        const detail = detailErreur(error);
+        statut.textContent = `Résultat non enregistré : ${detail}`;
+        confirmerEnregistrement(false, detail);
+        return;
+      }
+
+      let answers;
+      try {
+        answers = normaliserReponses(data.answers);
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        statut.textContent = `Résultat non enregistré : ${detail}`;
+        confirmerEnregistrement(false, detail);
+        return;
+      }
+
+      const scorePercent = data.score / data.maxScore * 100;
+      const resultat = {
+        email: eleveConnecte.email,
+        name: eleveConnecte.name,
+        classroom: eleveConnecte.classroom,
+        questId: queteEnCours.id,
+        title: queteEnCours.title,
+        score: data.score,
+        maxScore: data.maxScore,
+        scorePercent,
+        competencies
+      };
+      enregistrerResultat(resultat);
+      const sauvegarde = await enregistrerDansSupabase(resultat, answers, 'game');
+      statut.textContent = sauvegarde.enregistre
+        ? `Résultat et réponses enregistrés dans Supabase pour ${eleveConnecte.name || 'l’élève'}.`
+        : `Résultat visible dans le bilan de cette session, mais non sauvegardé dans Supabase. ${sauvegarde.erreur}`;
+      confirmerEnregistrement(sauvegarde.enregistre, sauvegarde.erreur);
+    });
+
+    // NAVIGATION DE TEST
+    function ouvrirEspaceEleve() {
+      if (modeApercuEnseignant) {
+        retournerVueEnseignant();
+        return;
+      }
+      if (enseignantConnecte) {
+        activerVueTest('student-space');
+        return;
+      }
+      if (eleveConnecte) {
+        activerVueTest('student-space');
+        return;
+      }
+      activerVueTest('student-space');
+      document.getElementById('student-email').focus();
+    }
+
+    function actualiserBoutonEspaceEleve() {
+      const bouton = document.getElementById('student-open');
+      if (modeApercuEnseignant) {
+        bouton.textContent = 'Retour à l’espace enseignant';
+      } else if (enseignantConnecte) {
+        bouton.textContent = 'Voir la vue élève';
+      } else if (eleveConnecte) {
+        bouton.textContent = 'Mon espace élève';
+      } else {
+        bouton.textContent = 'Espace élève / connexion';
+      }
+    }
+
+    function retournerVueEnseignant() {
+      if (!enseignantConnecte || !modeApercuEnseignant) return;
+      activerVueTest('teacher-space');
+    }
+
+    function activerVueTest(idSection) {
+      if (idSection === 'student-space' && !eleveConnecte) {
+        if (enseignantConnecte) {
+          const eleveApercu = lireListeEleves()[0] || {
+            email: 'apercu@chronoquest.invalid',
+            name: 'Élève de démonstration',
+            classroom: 'Aperçu'
+          };
+          eleveConnecte = { ...eleveApercu, id: null };
+          modeApercuEnseignant = true;
+          document.getElementById('student-logout').hidden = true;
+          document.getElementById('preview-teacher-return').hidden = false;
+          document.getElementById('student-auth-status').textContent =
+            lireListeEleves().length
+              ? `Aperçu enseignant — ${eleveApercu.name}. Les réponses de test ne seront pas enregistrées.`
+              : 'Aperçu enseignant — profil de démonstration. Importe la liste pour prévisualiser une classe réelle. Les réponses ne seront pas enregistrées.';
+          afficherIdentiteEleve();
+          actualiserBoutonEspaceEleve();
+        } else {
+          document.getElementById('student-auth-status').textContent =
+            'Connecte-toi avec ton adresse et ton mot de passe pour accéder à ton espace.';
+          idSection = 'landing';
+        }
+      } else if (modeApercuEnseignant && idSection !== 'student-space') {
+        modeApercuEnseignant = false;
+        eleveConnecte = null;
+        document.getElementById('student-logout').hidden = false;
+        document.getElementById('preview-teacher-return').hidden = true;
+        actualiserBoutonEspaceEleve();
+      }
+      document.querySelectorAll('main > section').forEach(sec => sec.hidden = true);
+      const cible = document.getElementById(idSection);
+      if (cible) {
+        cible.hidden = false;
+        const titre = cible.querySelector('h1, h2');
+        if (titre) titre.focus();
+      }
+      rafraichirQuetes();
+      rendreTableauResultats();
+    }
+
+    // ONGLETS ÉLÈVE
+    function basculerOngletEleve(onglet) {
+      document.getElementById('hub').hidden = (onglet !== 'hub');
+      document.getElementById('report').hidden = (onglet !== 'report');
+      document.getElementById('tab-hub').className = (onglet === 'hub' ? 'selected' : '');
+      document.getElementById('tab-report').className = (onglet === 'report' ? 'selected' : '');
+      document.getElementById('tab-hub').setAttribute('aria-selected', onglet === 'hub');
+      document.getElementById('tab-report').setAttribute('aria-selected', onglet === 'report');
+      document.getElementById('tab-hub').tabIndex = onglet === 'hub' ? 0 : -1;
+      document.getElementById('tab-report').tabIndex = onglet === 'report' ? 0 : -1;
+    }
+
+    // ONGLETS ENSEIGNANT
+    function basculerOngletEnseignant(onglet) {
+      const onglets = ['account', 'manage', 'roster', 'passwords', 'tracking'];
+      if (!onglets.includes(onglet)) return;
+      const idContenu = {
+        account: 'teacher-account',
+        manage: 'manage',
+        roster: 'roster',
+        passwords: 'passwords',
+        tracking: 'tracking'
+      };
+      onglets.forEach(nom => {
+        document.getElementById(idContenu[nom]).hidden = (onglet !== nom);
+        const tab = document.getElementById(`t-tab-${nom}`);
+        tab.className = onglet === nom ? 'selected' : '';
+        tab.setAttribute('aria-selected', String(onglet === nom));
+        tab.tabIndex = onglet === nom ? 0 : -1;
+      });
+    }
+
+    document.querySelectorAll('[role="tablist"]').forEach(tablist => {
+      tablist.addEventListener('keydown', event => {
+        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+        const index = tabs.indexOf(document.activeElement);
+        if (index === -1) return;
+        let nextIndex = index;
+        if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') nextIndex = 0;
+        else if (event.key === 'End') nextIndex = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        tabs[nextIndex].focus();
+        tabs[nextIndex].click();
+      });
+    });
+
+    // GESTION DES JEUX / QUÊTES
+    function queteDepuisLigne(ligne) {
+      return {
+        id: String(ligne.id),
+        title: ligne.title,
+        classrooms: Array.isArray(ligne.classrooms) ? ligne.classrooms : ['*'],
+        code: typeof ligne.code === 'string' ? ligne.code : '',
+        url: typeof ligne.url === 'string' ? ligne.url : '',
+        imageData: typeof ligne.image_data === 'string' ? ligne.image_data : ''
+      };
+    }
+
+    function ligneDepuisQuete(quete) {
+      return {
+        id: String(quete.id),
+        title: quete.title,
+        classrooms: classesCibles(quete),
+        code: quete.code || null,
+        url: quete.url || null,
+        image_data: quete.imageData || null
+      };
+    }
+
+    async function appliquerChangementDistant(changement) {
+      if (!supabaseClient || !enseignantConnecte) {
+        throw new Error('Connecte-toi avec un compte enseignant autorisé.');
+      }
+      if (changement.type === 'delete') {
+        const { error } = await supabaseClient.from('hub_games').delete().eq('id', String(changement.id));
+        if (error) throw error;
+        return;
+      }
+      const { error } = await supabaseClient.from('hub_games')
+        .upsert(ligneDepuisQuete(changement.quest), { onConflict: 'id' });
+      if (error) throw error;
+    }
+
+    async function chargerQuetesDistant() {
+      if (!supabaseClient) return;
+      try {
+        let { data, error } = await supabaseClient.from('hub_games')
+          .select('id,title,classrooms,code,url,image_data');
+        if (error) throw error;
+
+        if (enseignantConnecte && changementsQuetesEnAttente.length > 0) {
+          const encoreEnAttente = [];
+          const erreursSynchronisation = [];
+          for (const changement of changementsQuetesEnAttente) {
+            try {
+              await appliquerChangementDistant(changement);
+            } catch (error) {
+              encoreEnAttente.push(changement);
+              const detail = detailErreur(error);
+              erreursSynchronisation.push(`${changement.id} : ${detail}`);
+            }
+          }
+          changementsQuetesEnAttente = encoreEnAttente;
+          if (encoreEnAttente.length > 0) {
+            document.getElementById('quest-save-status').textContent =
+              `Modifications locales en attente de synchronisation : ${erreursSynchronisation.join(' | ')}`;
+          }
+          const resultat = await supabaseClient.from('hub_games')
+            .select('id,title,classrooms,code,url,image_data');
+          if (resultat.error) throw resultat.error;
+          data = resultat.data;
+        }
+
+        const catalogueParId = new Map(quetesCatalogue.map(quete => [String(quete.id), quete]));
+        const quetesDistant = (data || []).map(ligne => {
+          const quete = queteDepuisLigne(ligne);
+          const entreeCatalogue = catalogueParId.get(String(quete.id));
+          return entreeCatalogue
+            ? {
+                ...entreeCatalogue,
+                ...quete,
+                title: entreeCatalogue.title,
+                description: entreeCatalogue.description,
+                url: entreeCatalogue.url,
+                integrated: true
+              }
+            : quete;
+        });
+        meQuetes = appliquerChangementsEnAttente(fusionnerQuetes(
+          QUETES_INTEGREES,
+          quetesCatalogue,
+          quetesDistant
+        ));
+        sauvegarderCacheQuetes();
+        rafraichirQuetes();
+        if (changementsQuetesEnAttente.length === 0) {
+          document.getElementById('quest-save-status').textContent =
+            'Missions synchronisées avec Supabase et mises en cache sur cet appareil.';
+        }
+      } catch (error) {
+        const detail = detailErreur(error);
+        document.getElementById('quest-save-status').textContent =
+          `Impossible de charger les missions partagées. La copie locale est affichée. ${detail}`;
+      }
+    }
+
+    async function synchroniserChangementQuete(changement, copieLocaleSauvee) {
+      if (!enseignantConnecte) {
+        document.getElementById('quest-save-status').textContent =
+          copieLocaleSauvee
+            ? 'La mission est enregistrée sur cet appareil; connecte-toi pour la partager avec les élèves.'
+            : 'Échec de la copie locale. Connecte-toi pour tenter de sauvegarder la mission dans Supabase.';
+        return;
+      }
+      try {
+        await appliquerChangementDistant(changement);
+        changementsQuetesEnAttente = changementsQuetesEnAttente
+          .filter(item => String(item.id) !== String(changement.id));
+        const copieLocaleAJour = sauvegarderCacheQuetes();
+        document.getElementById('quest-save-status').textContent =
+          copieLocaleAJour
+            ? 'Mission et image sauvegardées dans Supabase et sur cet appareil.'
+            : 'Mission sauvegardée dans Supabase, mais la copie locale n’a pas pu être mise à jour.';
+      } catch (error) {
+        const detail = detailErreur(error);
+        document.getElementById('quest-save-status').textContent =
+          copieLocaleSauvee
+            ? `Copie locale conservée; échec de synchronisation Supabase : ${detail}`
+            : `Échec de la sauvegarde locale et de la synchronisation Supabase : ${detail}`;
+      }
+    }
+
+    async function lireImageMission(fichier) {
+      if (!fichier) return '';
+      if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(fichier.type)) {
+        throw new Error('Choisis une image PNG, JPEG, WebP ou GIF.');
+      }
+      if (fichier.size > TAILLE_MAX_IMAGE) {
+        throw new Error('L’image ne peut pas dépasser 500 Ko.');
+      }
+      return new Promise((resolve, reject) => {
+        const lecteur = new FileReader();
+        lecteur.onerror = () => reject(new Error('Le fichier image n’a pas pu être lu.'));
+        lecteur.onload = () => resolve(String(lecteur.result));
+        lecteur.readAsDataURL(fichier);
+      });
+    }
+
+    async function ajouterQuete(event) {
+      event.preventDefault();
+      if (!enseignantConnecte) {
+        document.getElementById('quest-save-status').textContent =
+          'Connecte-toi avec un compte enseignant pour enregistrer une mission.';
+        return;
+      }
+
+      const title = document.getElementById('q-title').value.trim();
+      const classrooms = Array.from(
+        document.querySelectorAll('#q-class-options input:checked'),
+        input => input.value
+      );
+      const code = document.getElementById('q-code').value.trim();
+      if (classrooms.length === 0) {
+        document.getElementById('quest-save-status').textContent =
+          'Sélectionne au moins une classe ou « Toutes les classes ».';
+        return;
+      }
+
+      const ancienId = idQueteEnModification;
+      const ancienneQuete = ancienId === null
+        ? null
+        : meQuetes.find(quete => String(quete.id) === String(ancienId));
+      const fichier = document.getElementById('q-image').files[0];
+      let imageData = ancienneQuete?.imageData || '';
+      try {
+        if (fichier) imageData = await lireImageMission(fichier);
+        else if (document.getElementById('q-image-remove').checked) imageData = '';
+      } catch (error) {
+        document.getElementById('quest-save-status').textContent =
+          detailErreur(error);
+        return;
+      }
+
+      const quete = {
+        id: ancienId || `jeu-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        title,
+        classrooms,
+        code,
+        imageData
+      };
+      const changement = { id: String(quete.id), type: 'upsert', quest: quete };
+      meQuetes = fusionnerQuetes(meQuetes, [quete]);
+      changementsQuetesEnAttente = changementsQuetesEnAttente
+        .filter(item => String(item.id) !== String(quete.id));
+      changementsQuetesEnAttente.push(changement);
+      const copieLocaleSauvee = sauvegarderCacheQuetes();
+      rafraichirQuetes();
+      reinitialiserFormulaireQuete();
+      await synchroniserChangementQuete(changement, copieLocaleSauvee);
+    }
+
+    function modifierQuete(id) {
+      if (!enseignantConnecte) return;
+      const quete = meQuetes.find(item => String(item.id) === String(id));
+      if (!quete || quete.integrated) return;
+      idQueteEnModification = String(quete.id);
+      document.getElementById('q-id').value = String(quete.id);
+      document.getElementById('q-title').value = quete.title;
+      document.getElementById('q-code').value = quete.code || '';
+      actualiserChoixClasses(classesCibles(quete));
+      document.getElementById('q-image-remove').checked = false;
+      document.getElementById('q-image-remove-label').hidden = !quete.imageData;
+      const preview = document.getElementById('q-image-preview');
+      preview.hidden = !quete.imageData;
+      preview.src = quete.imageData || '';
+      document.querySelector('#quest-form button[type="submit"]').textContent = 'Enregistrer les modifications';
+      document.getElementById('q-cancel-edit').hidden = false;
+      document.getElementById('q-title').focus();
+    }
+
+    function reinitialiserFormulaireQuete() {
+      document.getElementById('quest-form').reset();
+      idQueteEnModification = null;
+      document.getElementById('q-id').value = '';
+      document.getElementById('q-image-preview').hidden = true;
+      document.getElementById('q-image-preview').removeAttribute('src');
+      document.getElementById('q-image-remove-label').hidden = true;
+      document.getElementById('q-cancel-edit').hidden = true;
+      document.querySelector('#quest-form button[type="submit"]').textContent = 'Publier la mission ↗';
+      actualiserChoixClasses(['*']);
+    }
+
+    function annulerModificationQuete() {
+      reinitialiserFormulaireQuete();
+      document.getElementById('quest-save-status').textContent = 'Modification annulée.';
+    }
+
+    function supprimerQuete(id) {
+      const quete = meQuetes.find(item => String(item.id) === String(id));
+      if (!enseignantConnecte || !quete || quete.integrated) return;
+      if (confirm(`Voulez-vous vraiment supprimer la mission « ${quete.title} » ?`)) {
+        const changement = { id: String(id), type: 'delete' };
+        meQuetes = meQuetes.filter(item => String(item.id) !== String(id));
+        changementsQuetesEnAttente = changementsQuetesEnAttente
+          .filter(item => String(item.id) !== String(id));
+        changementsQuetesEnAttente.push(changement);
+        const copieLocaleSauvee = sauvegarderCacheQuetes();
+        rafraichirQuetes();
+        void synchroniserChangementQuete(changement, copieLocaleSauvee);
+      }
+    }
+
+    function rafraichirQuetes() {
+      // Mettre à jour l'espace enseignant
+      const teacherContainer = document.getElementById('teacher-quests-list');
+      document.getElementById('quest-count').textContent = meQuetes.length;
+      teacherContainer.innerHTML = '';
+
+      meQuetes.forEach(q => {
+        const item = document.createElement('div');
+        item.className = 'paper';
+        item.style.padding = '15px';
+        const ligne = document.createElement('div');
+        ligne.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:12px;';
+        const details = document.createElement('div');
+        if (q.imageData) {
+          const image = document.createElement('img');
+          image.className = 'quest-cover';
+          image.src = q.imageData;
+          image.alt = `Image de couverture : ${q.title}`;
+          image.loading = 'lazy';
+          details.appendChild(image);
+        }
+        const titre = document.createElement('strong');
+        titre.textContent = q.title;
+        const classes = document.createElement('small');
+        classes.style.cssText = 'display:block; color:var(--text-muted);';
+        classes.textContent = `Classes : ${nomClassesCibles(q)}`;
+        details.append(titre, classes);
+        ligne.appendChild(details);
+        if (q.integrated) {
+          const origine = document.createElement('small');
+          origine.textContent = 'Jeu intégré au Hub';
+          ligne.appendChild(origine);
+        } else {
+          const actions = document.createElement('div');
+          actions.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap;';
+          const modifier = document.createElement('button');
+          modifier.type = 'button';
+          modifier.className = 'quiet';
+          modifier.textContent = 'Modifier';
+          modifier.disabled = !enseignantConnecte;
+          modifier.addEventListener('click', () => modifierQuete(q.id));
+          const supprimer = document.createElement('button');
+          supprimer.type = 'button';
+          supprimer.className = 'danger';
+          supprimer.textContent = 'Supprimer';
+          supprimer.disabled = !enseignantConnecte;
+          supprimer.addEventListener('click', () => supprimerQuete(q.id));
+          actions.append(modifier, supprimer);
+          ligne.appendChild(actions);
+        }
+        item.appendChild(ligne);
+        teacherContainer.appendChild(item);
+      });
+
+      // Mettre à jour l'espace élève
+      const studentContainer = document.getElementById('student-quest-list');
+      studentContainer.innerHTML = '';
+
+      const quetesVisibles = eleveConnecte ? meQuetes.filter(queteVisiblePourEleve) : [];
+      quetesVisibles.forEach(q => {
+        const card = document.createElement('div');
+        card.className = 'quest-card';
+        const contenu = document.createElement('div');
+        if (q.imageData) {
+          const image = document.createElement('img');
+          image.className = 'quest-cover';
+          image.src = q.imageData;
+          image.alt = `Image de couverture : ${q.title}`;
+          image.loading = 'lazy';
+          contenu.appendChild(image);
+        }
+        const etiquette = document.createElement('span');
+        etiquette.className = 'eyebrow';
+        etiquette.textContent = 'MISSION';
+        const titre = document.createElement('h3');
+        titre.textContent = q.title;
+        contenu.append(etiquette, titre);
+        if (q.description) {
+          const description = document.createElement('p');
+          description.textContent = q.description;
+          contenu.appendChild(description);
+        }
+        const classes = document.createElement('p');
+        classes.style.cssText = 'color:var(--text-muted); font-size:0.9rem; margin-top:5px;';
+        classes.textContent = `Pour : ${nomClassesCibles(q)}`;
+        contenu.appendChild(classes);
+        const lancer = document.createElement('button');
+        lancer.type = 'button';
+        lancer.className = 'primary';
+        lancer.style.marginTop = '15px';
+        lancer.textContent = 'Lancer la mission ↗';
+        lancer.addEventListener('click', () => lancerJeu(q.id, lancer));
+        card.append(contenu, lancer);
+        studentContainer.appendChild(card);
+      });
+
+      if (eleveConnecte && quetesVisibles.length === 0) {
+        const message = document.createElement('p');
+        message.className = 'paper';
+        message.textContent = `Aucune mission n’est encore diffusée pour la classe ${eleveConnecte.classroom}.`;
+        studentContainer.appendChild(message);
+      }
+
+      mettreAJourSelecteurResultats();
+      actualiserSelecteurReinitialisation();
+      actualiserFiltreMissionResultats();
+      rendreTableauEnseignant();
+    }
+
+    let boutonLanceurJeu = null;
+
+    function lancerJeu(id, bouton) {
+      if (modeApercuEnseignant) {
+        document.getElementById('game-result-status').textContent =
+          'Aperçu enseignant : les réponses et résultats de test ne seront pas enregistrés.';
+      }
+      const quete = meQuetes.find(q => q.id === id);
+      if (quete) {
+        boutonLanceurJeu = bouton;
+        queteEnCours = quete;
+        document.getElementById('game-result-status').textContent = '';
+        document.getElementById('game-title').textContent = quete.title;
+        const iframe = document.getElementById('game-frame');
+        iframe.title = 'Mini-jeu : ' + quete.title;
+        if (typeof quete.url === 'string' && quete.url.trim()) {
+          iframe.removeAttribute('srcdoc');
+          iframe.src = new URL(quete.url, document.baseURI).href;
+        } else {
+          iframe.removeAttribute('src');
+          iframe.srcdoc = quete.code;
+        }
+        document.getElementById('game-dialog').showModal();
+        document.getElementById('game-close').focus();
+      }
+    }
+
+    function fermerJeu() {
+      document.getElementById('game-dialog').close();
+    }
+
+    document.getElementById('game-dialog').addEventListener('close', () => {
+      if (boutonLanceurJeu && boutonLanceurJeu.isConnected) boutonLanceurJeu.focus();
+      queteEnCours = null;
+    });
+
+    async function chargerFichierExcel() {
+      if (!supabaseClient || !enseignantConnecte) {
+        alert('Connecte-toi avec le compte enseignant autorisé avant d’importer la liste.');
+        return;
+      }
+      const input = document.getElementById('excel-file');
+      const fichier = input.files[0];
+      if (!fichier) {
+        alert('Veuillez d\'abord choisir un fichier Excel.');
+        return;
+      }
+
+      if (typeof XLSX === 'undefined') {
+        alert('La bibliothèque de lecture Excel est indisponible. Vérifie ta connexion internet puis réessaie.');
+        return;
+      }
+
+      try {
+        const classeur = XLSX.read(await fichier.arrayBuffer(), { type: 'array' });
+        const feuille = classeur.Sheets[classeur.SheetNames[0]];
+        if (!feuille) {
+          alert('Le fichier ne contient aucune feuille à importer.');
+          return;
+        }
+
+        const lignes = XLSX.utils.sheet_to_json(feuille, { header: 1, defval: '', raw: false });
+        const normaliserEntete = valeur => String(valeur).trim().toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+        const entetes = (lignes[0] || []).map(normaliserEntete);
+        const indexEmail = entetes.findIndex(entete => ['email', 'courriel'].includes(entete));
+        const indexNom = entetes.findIndex(entete => ['nom', 'name'].includes(entete));
+        const indexClasse = entetes.findIndex(entete => ['classe', 'class'].includes(entete));
+
+        if (indexEmail < 0 || indexNom < 0 || indexClasse < 0) {
+          alert('Colonnes manquantes : le fichier doit contenir les en-têtes email, nom et classe.');
+          return;
+        }
+
+        const nouveauxEleves = [];
+        const emails = new Set();
+        for (let index = 1; index < lignes.length; index += 1) {
+          const ligne = lignes[index];
+          const email = String(ligne[indexEmail] || '').trim();
+          const name = String(ligne[indexNom] || '').trim();
+          const classroom = String(ligne[indexClasse] || '').trim();
+          if (!email && !name && !classroom) continue;
+
+          if (!email || !name || !classroom || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            alert(`La ligne ${index + 1} est incomplète ou contient une adresse e-mail invalide.`);
+            return;
+          }
+          const emailNormalise = email.toLocaleLowerCase('fr');
+          if (emails.has(emailNormalise)) {
+            alert(`L’adresse ${email} apparaît plusieurs fois dans le fichier.`);
+            return;
+          }
+          emails.add(emailNormalise);
+          nouveauxEleves.push({ email, name, classroom });
+        }
+
+        if (nouveauxEleves.length === 0) {
+          alert('Aucun élève à importer n’a été trouvé sous les en-têtes.');
+          return;
+        }
+
+        const { error } = await supabaseClient.from('student_roster').upsert(
+          nouveauxEleves.map(eleve => ({
+            ...eleve,
+            email: eleve.email.toLocaleLowerCase('fr')
+          })),
+          { onConflict: 'email' }
+        );
+        if (error) {
+          alert(`La liste n’a pas été enregistrée dans Supabase : ${detailErreur(error)}`);
+          return;
+        }
+        await chargerListeElevesDistant();
+        rafraichirQuetes();
+        mettreAJourSelecteurResultats();
+        alert(`${nouveauxEleves.length} élève(s) importé(s) ou mis à jour dans la liste partagée de Supabase.`);
+      } catch (error) {
+        const detail = error instanceof Error ? ` ${error.message}` : '';
+        alert(`Impossible de lire le fichier sélectionné.${detail}`);
+      }
+    }
+
+    // Initialisation
+    chargerCacheQuetes();
+    actualiserChoixClasses();
+    mettreAJourSelecteurResultats();
+    rendreTableauResultats();
+    rendreTableauEnseignant();
+    rafraichirQuetes();
+    document.getElementById('q-image').addEventListener('change', async event => {
+      const fichier = event.currentTarget.files[0];
+      const preview = document.getElementById('q-image-preview');
+      if (!fichier) return;
+      try {
+        preview.src = await lireImageMission(fichier);
+        preview.hidden = false;
+        document.getElementById('q-image-remove-label').hidden = true;
+        document.getElementById('q-image-remove').checked = false;
+        document.getElementById('quest-save-status').textContent =
+          `Image prête à être enregistrée (${Math.ceil(fichier.size / 1024)} Ko).`;
+      } catch (error) {
+        event.currentTarget.value = '';
+        preview.hidden = true;
+        document.getElementById('quest-save-status').textContent =
+          detailErreur(error);
+      }
+    });
+    document.getElementById('q-image-remove').addEventListener('change', event => {
+      if (event.currentTarget.checked) {
+        document.getElementById('q-image-preview').hidden = true;
+      } else if (idQueteEnModification !== null) {
+        const quete = meQuetes.find(item => String(item.id) === String(idQueteEnModification));
+        if (quete?.imageData) document.getElementById('q-image-preview').hidden = false;
+      }
+    });
+    void chargerCatalogueJeux();
+    void initialiserSupabase();
+  </script>
+</body>
+</html
