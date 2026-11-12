@@ -1,0 +1,14 @@
+[
+  {
+    "id": "chronoromain",
+    "title": "ChronoRomain",
+    "description": "Le jeu existant",
+    "folder": ""
+  },
+  {
+    "id": "detective-doc.html",
+    "title": "Détective Doc",
+    "description": "Jeu de pertinence documentaire et d'analyse de sources",
+    "folder": "jeux/"
+  }
+]

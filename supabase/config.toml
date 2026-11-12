@@ -1,0 +1,4 @@
+project_id = "dpmbygacgygczrnvozjb"
+
+[functions.reset-student-password]
+verify_jwt = true

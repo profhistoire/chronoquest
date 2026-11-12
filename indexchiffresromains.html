@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChronoRomain - Niveaux & Explications</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: #eef2f5; margin: 0; padding: 15px; display: flex; justify-content: center; }
+    .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 480px; text-align: center; }
+    h1 { color: #2c3e50; font-size: 1.4rem; margin-top: 0; }
+    
+    .level-select { margin-bottom: 15px; }
+    select { padding: 8px 12px; font-size: 0.95rem; border-radius: 8px; border: 2px solid #3498db; background: white; color: #2c3e50; font-weight: bold; width: 100%; }
+
+    .question-box { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 15px; margin-bottom: 15px; position: relative; }
+    .question-title { font-size: 0.85rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+    .question-text { font-size: 1.25rem; font-weight: bold; color: #2c3e50; margin: 10px 0; }
+    
+    input { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ccc; border-radius: 8px; text-align: center; margin-bottom: 15px; outline: none; }
+    input:focus { border-color: #3498db; }
+    
+    button.action-btn { background: #2ecc71; color: white; border: none; padding: 12px; font-size: 1rem; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+    button.action-btn:hover { background: #27ae60; }
+    
+    .feedback { margin-top: 15px; padding: 15px; border-radius: 10px; font-size: 0.95rem; text-align: left; display: none; line-height: 1.4; }
+    .correct { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .incorrect { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    
+    .roman-img { width: 90px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+    .explanation { margin-top: 8px; font-size: 0.88rem; font-style: italic; color: #495057; border-top: 1px dashed #ccc; padding-top: 8px; }
+
+    .score-board { margin-top: 15px; font-size: 0.9rem; color: #7f8c8d; }
+    .save-status { min-height: 1.4em; margin: 8px 0 0; font-size: 0.85rem; color: #495057; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>ChronoRomain</h1>
+
+  <div class="level-select">
+    <select id="levelSelect" onchange="changerNiveau()">
+      <option value="1">Niveau 1 : Symboles de base (1 à 20)</option>
+      <option value="2">Niveau 2 : Grands nombres (jusqu'à 100)</option>
+      <option value="3">Niveau 3 : Siècles simples (ap. J.-C.)</option>
+      <option value="4">Niveau 4 : Millénaires & Siècles complexes</option>
+      <option value="5">Niveau 5 : Dates complètes (1 à 2026)</option>
+      <option value="6">Niveau 6 : Mode Expert (avant J.-C.)</option>
+    </select>
+  </div>
+
+  <div class="question-box">
+    <div class="question-title" id="qCategory">Catégorie</div>
+    <div class="question-text" id="qText">Question...</div>
+  </div>
+  
+  <input type="text" id="exoInput" placeholder="Ta réponse ici..." autocomplete="off">
+  <button class="action-btn" id="btnValider" onclick="verifierReponse()">Valider</button>
+  
+  <div id="feedback" class="feedback">
+    <div id="feedbackContent"></div>
+  </div>
+
+  <div class="score-board">Score : <span id="scoreVal">0</span> / <span id="totalVal">0</span></div>
+  <p id="saveStatus" class="save-status" role="status" aria-live="polite"></p>
+</div>
+
+<script>
+const tableRomaine = [
+  { v: 1000, s: 'M' }, { v: 900, s: 'CM' }, { v: 500, s: 'D' }, { v: 400, s: 'CD' },
+  { v: 100, s: 'C' }, { v: 90, s: 'XC' }, { v: 50, s: 'L' }, { v: 40, s: 'XL' },
+  { v: 10, s: 'X' }, { v: 9, s: 'IX' }, { v: 5, s: 'V' }, { v: 4, s: 'IV' }, { v: 1, s: 'I' }
+];
+
+// Image du Romain avec le pouce levé (encodée ou SVG)
+const imgRomain = `<svg class="roman-img" viewBox="0 0 100 100">
+  <circle cx="50" cy="40" r="22" fill="#f1c40f"/>
+  <path d="M 30 20 Q 50 5 70 20 L 65 30 L 35 30 Z" fill="#e74c3c"/>
+  <rect x="40" y="62" width="20" height="30" fill="#e74c3c"/>
+  <circle cx="75" cy="50" r="8" fill="#f1c40f"/>
+  <path d="M 75 42 L 75 32" stroke="#222" stroke-width="4" stroke-linecap="round"/>
+</svg>`;
+
+function enChiffresRomains(num) {
+  let res = '';
+  for (const { v, s } of tableRomaine) {
+    while (num >= v) { res += s; num -= v; }
+  }
+  return res;
+}
+
+let questionActuelle = {};
+let score = 0;
+let total = 0;
+let attendReponse = true;
+let dernierEnvoiReponse = '';
+
+window.addEventListener('message', event => {
+  if (event.source !== window.parent ||
+      !event.data || event.data.type !== 'chronoquest-answer-saved' ||
+      event.data.requestId !== dernierEnvoiReponse) return;
+
+  document.getElementById('saveStatus').textContent = event.data.saved
+    ? 'Réponse enregistrée dans Supabase.'
+    : `Réponse non enregistrée. ${event.data.error || 'Vérifie la connexion au Hub.'}`;
+});
+
+function changerNiveau() {
+  score = 0;
+  total = 0;
+  document.getElementById('scoreVal').textContent = score;
+  document.getElementById('totalVal').textContent = total;
+  genererQuestion();
+}
+
+function genererQuestion() {
+  attendReponse = true;
+  document.getElementById('exoInput').value = '';
+  document.getElementById('exoInput').disabled = false;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('btnValider').textContent = 'Valider';
+
+  const lvl = parseInt(document.getElementById('levelSelect').value);
+
+  if (lvl === 1) {
+    const val = Math.floor(Math.random() * 20) + 1;
+    questionActuelle = {
+      cat: 'Niveau 1 - Chiffres Romains',
+      text: `Convertis ${val} en chiffres romains :`,
+      rep: enChiffresRomains(val),
+      exp: `Les symboles de base sont I(1), V(5), X(10). On place un petit symbole à gauche pour soustraire (IV=4, IX=9).`
+    };
+  } else if (lvl === 2) {
+    const val = Math.floor(Math.random() * 80) + 21;
+    questionActuelle = {
+      cat: 'Niveau 2 - Grands Nombres',
+      text: `À quel nombre arabe correspond ${enChiffresRomains(val)} ?`,
+      rep: val.toString(),
+      exp: `${enChiffresRomains(val)} se décompose avec L(50), C(100) et les règles de soustraction (XL=40, XC=90).`
+    };
+  } else if (lvl === 3) {
+    const annee = Math.floor(Math.random() * 1900) + 100;
+    const siecle = Math.ceil(annee / 100);
+    questionActuelle = {
+      cat: 'Niveau 3 - Siècles',
+      text: `En quel siècle se situe l'année ${annee} ? (en chiffres romains, ex: XXI)`,
+      rep: enChiffresRomains(siecle),
+      exp: `Pour trouver le siècle de l'année ${annee} : divise par 100 et arrondis au supérieur (${annee} → ${siecle}ᵉ siècle).`
+    };
+  } else if (lvl === 4) {
+    const annee = Math.floor(Math.random() * 2000) + 1;
+    const isMillenaire = Math.random() > 0.5;
+    if (isMillenaire) {
+      const mil = Math.ceil(annee / 1000);
+      questionActuelle = {
+        cat: 'Niveau 4 - Millénaires',
+        text: `Quel est le millénaire de l'année ${annee} ? (ex: I, II, III)`,
+        rep: enChiffresRomains(mil),
+        exp: `L'année ${annee} fait partie du ${mil}ᵉʳ millénaire car 1 millénaire = 1000 ans.`
+      };
+    } else {
+      const siecle = Math.ceil(annee / 100);
+      questionActuelle = {
+        cat: 'Niveau 4 - Siècles',
+        text: `En quel siècle sommes-nous en l'an ${annee} ?`,
+        rep: enChiffresRomains(siecle),
+        exp: `L'année ${annee} appartient au ${enChiffresRomains(siecle)}ᵉ siècle (de ${ (siecle-1)*100 + 1 } à ${ siecle*100 }).`
+      };
+    }
+  } else if (lvl === 5) {
+    const annee = Math.floor(Math.random() * 2026) + 1;
+    questionActuelle = {
+      cat: 'Niveau 5 - Dates Historiques',
+      text: `Écris l'année ${annee} complète en chiffres romains :`,
+      rep: enChiffresRomains(annee),
+      exp: `${annee} se décompose : M(1000), D(500), C(100), L(50), X(10), V(5), I(1).`
+    };
+  } else {
+    // Niveau 6 : Avant J.-C.
+    const anneeAbs = Math.floor(Math.random() * 800) + 1;
+    const siecle = Math.ceil(anneeAbs / 100);
+    questionActuelle = {
+      cat: 'Niveau 6 - Avant J.-C.',
+      text: `Quel est le siècle de l'année -${anneeAbs} (${anneeAbs} av. J.-C.) ?`,
+      rep: enChiffresRomains(siecle),
+      exp: `Pour -${anneeAbs}, le calcul du siècle reste le même (${siecle}ᵉ siècle), mais on précise "av. J.-C." car la numérotation compte à l'envers.`
+    };
+  }
+
+  document.getElementById('qCategory').textContent = questionActuelle.cat;
+  document.getElementById('qText').textContent = questionActuelle.text;
+}
+
+function verifierReponse() {
+  if (!attendReponse) {
+    genererQuestion();
+    return;
+  }
+
+  const saisie = document.getElementById('exoInput').value.trim().toUpperCase();
+  if (!saisie) return;
+  const reponseEleve = document.getElementById('exoInput').value.trim();
+
+  const fb = document.getElementById('feedback');
+  const fbContent = document.getElementById('feedbackContent');
+  const bonneReponse = questionActuelle.rep;
+  total++;
+
+  const estCorrecte = saisie === bonneReponse.toUpperCase();
+  if (estCorrecte) {
+    score++;
+    fbContent.innerHTML = `
+      ${imgRomain}
+      <strong>Optime ! (Bravo !)</strong> Bonne réponse.
+    `;
+    fb.className = "feedback correct";
+  } else {
+    fbContent.innerHTML = `
+      <strong>Erreur !</strong> La bonne réponse était : <strong>${questionActuelle.rep}</strong>
+      <div class="explanation">💡 <strong>Explication :</strong> ${questionActuelle.exp}</div>
+    `;
+    fb.className = "feedback incorrect";
+  }
+
+  document.getElementById('scoreVal').textContent = score;
+  document.getElementById('totalVal').textContent = total;
+  fb.style.display = 'block';
+  document.getElementById('exoInput').disabled = true;
+  document.getElementById('btnValider').textContent = 'Question suivante';
+  attendReponse = false;
+
+  const requestId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  dernierEnvoiReponse = requestId;
+  const saveStatus = document.getElementById('saveStatus');
+  if (window.parent === window) {
+    saveStatus.textContent = 'Pour enregistrer cette réponse, ouvre le jeu depuis ChronoQuest après t’être identifié.';
+    return;
+  }
+
+  saveStatus.textContent = 'Enregistrement de la réponse…';
+  window.parent.postMessage({
+    type: 'chronoquest-answer',
+    requestId,
+    level: Number(document.getElementById('levelSelect').value),
+    questionNumber: total,
+    question: questionActuelle.text,
+    studentAnswer: reponseEleve,
+    correctAnswer: bonneReponse,
+    isCorrect: estCorrecte,
+    score,
+    maxScore: total
+  }, '*');
+  window.setTimeout(() => {
+    if (dernierEnvoiReponse === requestId &&
+        saveStatus.textContent === 'Enregistrement de la réponse…') {
+      saveStatus.textContent = 'Aucune confirmation reçue du Hub. Vérifie que le jeu est lancé depuis ChronoQuest.';
+    }
+  }, 10000);
+}
+
+genererQuestion();
+</script>
+</body>
+</html>
