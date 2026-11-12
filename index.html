@@ -995,12 +995,16 @@
           <h1 tabindex="-1">Le QG enseignant</h1>
           <p style="color: var(--text-muted);">Gérez vos quêtes et leurs images. Les missions sont sauvegardées dans Supabase et conservées sur cet appareil comme copie de secours.</p>
         </div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button id="teacher-add-quest" class="primary" type="button" onclick="ouvrirCreationMission()" hidden>+ Ajouter une mission</button>
+        </div>
         <p id="supabase-storage-status" role="status" aria-live="polite" style="flex-basis:100%; color: var(--text-muted); margin-top: 10px;"></p>
       </div>
 
       <nav class="tabs" role="tablist" aria-label="Espace enseignant" hidden>
         <button id="t-tab-account" class="selected" type="button" role="tab" aria-selected="true" aria-controls="teacher-account" onclick="basculerOngletEnseignant('account')">Compte enseignant</button>
         <button id="t-tab-manage" type="button" role="tab" aria-selected="false" aria-controls="manage" tabindex="-1" onclick="basculerOngletEnseignant('manage')">Missions</button>
+        <button id="t-tab-preview" type="button" role="tab" aria-selected="false" aria-controls="student-space" tabindex="-1" onclick="basculerOngletEnseignant('preview')">Vue Élève</button>
         <button id="t-tab-roster" type="button" role="tab" aria-selected="false" aria-controls="roster" tabindex="-1" onclick="basculerOngletEnseignant('roster')">Liste des Élèves (Excel)</button>
         <button id="t-tab-passwords" type="button" role="tab" aria-selected="false" aria-controls="passwords" tabindex="-1" onclick="basculerOngletEnseignant('passwords')">Réinitialisation des mots de passe</button>
         <button id="t-tab-tracking" type="button" role="tab" aria-selected="false" aria-controls="tracking" tabindex="-1" onclick="basculerOngletEnseignant('tracking')">Résultats</button>
@@ -1208,7 +1212,7 @@
             </div>
           </form>
 
-          <h2>Résultats des élèves</h2>
+          <h2>Résultats de la classe</h2>
           <nav class="tabs" role="tablist" aria-label="Vues des résultats">
             <button id="teacher-results-mission-tab" class="selected" type="button" role="tab"
               aria-selected="true" aria-controls="teacher-results-by-mission"
@@ -1225,7 +1229,7 @@
               <div class="result-field">
                 <label for="teacher-quest-filter">Mission à afficher</label>
                 <select id="teacher-quest-filter" onchange="rendreTableauEnseignant()" aria-controls="teacher-results-body">
-                  <option value="*">Toutes les missions</option>
+                  <option value="">Choisir une mission</option>
                 </select>
               </div>
               <div class="result-field">
@@ -1259,6 +1263,8 @@
 
           <section id="teacher-results-by-student" role="tabpanel"
             aria-labelledby="teacher-results-student-tab" tabindex="0" hidden>
+            <h3>Historique complet de l’élève</h3>
+            <p>Les tentatives, les dates et les notes de toutes ses missions sont affichées, y compris les résultats précédents.</p>
             <div class="result-fields" style="max-width: 520px; margin: 12px 0;">
               <div class="result-field">
                 <label for="teacher-history-student">Élève à afficher</label>
@@ -1312,10 +1318,9 @@
 
   <!-- BARRE DE SECOURS / MODE TEST -->
   <nav id="test-navigation" aria-label="Navigation du mode test" hidden style="position: fixed; bottom: 12px; right: 12px; z-index: 99999; background: #1f212d; border: 2px solid #f5cb4e; padding: 8px 14px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: flex; gap: 8px; align-items: center;">
-    <span style="font-size: 0.75rem; font-weight: bold; color: #f5cb4e; text-transform: uppercase;">MODE TEST :</span>
+    <span id="test-navigation-label" style="font-size: 0.75rem; font-weight: bold; color: #f5cb4e; text-transform: uppercase;">MODE TEST · PROF</span>
     <button type="button" onclick="activerVueTest('landing')" style="background:#333; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Accueil</button>
-    <button type="button" onclick="activerVueTest('student-space')" style="background:#205c33; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Vue Élève</button>
-    <button type="button" onclick="activerVueTest('teacher-space')" style="background:#174f87; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Vue Enseignant</button>
+    <button id="test-view-toggle" type="button" aria-label="Basculer entre la vue élève et la vue prof" aria-pressed="false" onclick="basculerVueTest()" style="background:#205c33; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Vue Élève</button>
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1348,6 +1353,7 @@
     let queteEnCours = null;
     let supabaseClient = null;
     let enseignantConnecte = false;
+    let ongletEnseignantActif = 'account';
     let idQueteEnModification = null;
     let supabaseConfigurationErreur = 'Supabase n’est pas configuré. Consulte le fichier SUPABASE.md.';
 
@@ -1481,6 +1487,7 @@
       const ongletsEnseignant = document.querySelector('#teacher-space > nav');
       const estConnecte = enseignantConnecte;
       actualiserBoutonEspaceEleve();
+      document.getElementById('teacher-add-quest').hidden = !estConnecte;
       ongletsEnseignant.hidden = !estConnecte;
       formulaire.hidden = estConnecte;
       sessionElement.hidden = !estConnecte;
@@ -2161,7 +2168,7 @@
     function actualiserFiltreMissionResultats() {
       const selecteur = document.getElementById('teacher-quest-filter');
       if (!selecteur) return;
-      const ancienneMission = selecteur.value || '*';
+      const ancienneMission = selecteur.value;
       const missions = new Map();
       meQuetes.forEach(quete => missions.set(String(quete.id), quete.title));
       resultats.forEach(resultat => {
@@ -2174,17 +2181,17 @@
       toutesLesMissions.value = '*';
       toutesLesMissions.textContent = 'Toutes les missions';
       selecteur.appendChild(toutesLesMissions);
-      [...missions.entries()]
-        .sort((a, b) => a[1].localeCompare(b[1], 'fr', { sensitivity: 'base' }))
-        .forEach(([id, titre]) => {
-          const option = document.createElement('option');
-          option.value = id;
-          option.textContent = titre;
-          selecteur.appendChild(option);
-        });
-      selecteur.value = missions.has(ancienneMission) || ancienneMission === '*'
+      const missionsTriees = [...missions.entries()]
+        .sort((a, b) => a[1].localeCompare(b[1], 'fr', { sensitivity: 'base' }));
+      missionsTriees.forEach(([id, titre]) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = titre;
+        selecteur.appendChild(option);
+      });
+      selecteur.value = ancienneMission === '*' || missions.has(ancienneMission)
         ? ancienneMission
-        : '*';
+        : (missionsTriees[0]?.[0] || '');
     }
 
     function actualiserSelecteurHistoriqueEleves() {
@@ -2559,12 +2566,12 @@
       const corps = document.getElementById('teacher-results-body');
       corps.replaceChildren();
       const classeChoisie = document.getElementById('teacher-class-filter')?.value || '*';
-      const missionChoisie = document.getElementById('teacher-quest-filter')?.value || '*';
+      const missionChoisie = document.getElementById('teacher-quest-filter')?.value || '';
       const resultatsCorrespondants = resultats
         .filter(resultat =>
           (classeChoisie === '*' ||
             normaliserClasse(resultat.classroom) === normaliserClasse(classeChoisie)) &&
-          (missionChoisie === '*' || String(resultat.questId) === missionChoisie)
+          (missionChoisie !== '' && (missionChoisie === '*' || String(resultat.questId) === missionChoisie))
         );
       const clesResultats = new Set(
         resultatsCorrespondants.map(resultat =>
@@ -2637,14 +2644,16 @@
       const classeTexte = classeChoisie === '*' ? 'toutes les classes' : `la classe ${classeChoisie}`;
       const mission = meQuetes.find(quete => String(quete.id) === missionChoisie) ||
         resultats.find(resultat => String(resultat.questId) === missionChoisie);
-      const missionTexte = missionChoisie === '*' ? 'toutes les missions' :
+      const missionTexte = missionChoisie === '' ? '' : missionChoisie === '*' ? 'toutes les missions' :
         `la mission ${mission ? mission.title : missionChoisie}`;
       const evaluations = resultatsVisibles.filter(resultat =>
         resultat.score !== null && resultat.score !== undefined
       ).length;
-      document.getElementById('teacher-results-summary').textContent = resultatsVisibles.length
-        ? `${resultatsVisibles.length} ligne(s) élève-mission pour ${missionTexte} et ${classeTexte}; ${evaluations} résultat(s) enregistré(s). « — » signifie qu’aucun résultat n’est encore disponible.`
-        : `Aucun élève trouvé pour ${missionTexte} et ${classeTexte}. Importe la liste des élèves dans l’onglet correspondant.`;
+      document.getElementById('teacher-results-summary').textContent = missionChoisie === ''
+        ? 'Aucune mission disponible. Publie une mission pour consulter les résultats de la classe.'
+        : resultatsVisibles.length
+          ? `${resultatsVisibles.length} élève(s) pour ${missionTexte} et ${classeTexte}; ${evaluations} résultat(s) enregistré(s). « — » signifie qu’aucun résultat n’est encore disponible.`
+          : `Aucun élève trouvé pour ${missionTexte} et ${classeTexte}. Importe la liste des élèves dans l’onglet correspondant.`;
     }
 
     window.addEventListener('message', async event => {
@@ -2833,9 +2842,45 @@
       }
     }
 
+    function actualiserNavigationModeTest() {
+      const bouton = document.getElementById('test-view-toggle');
+      const etiquette = modeApercuEnseignant ? 'Vue Prof' : 'Vue Élève';
+      bouton.textContent = etiquette;
+      bouton.style.background = modeApercuEnseignant ? '#174f87' : '#205c33';
+      bouton.setAttribute('aria-pressed', String(modeApercuEnseignant));
+      document.getElementById('test-navigation-label').textContent =
+        modeApercuEnseignant ? 'MODE TEST · ÉLÈVE' : 'MODE TEST · PROF';
+    }
+
+    function basculerVueTest() {
+      if (!enseignantConnecte) return;
+      if (modeApercuEnseignant) {
+        retournerVueEnseignant();
+      } else {
+        ouvrirVueEleveEnseignant();
+      }
+    }
+
+    function ouvrirVueEleveEnseignant() {
+      if (!enseignantConnecte) return;
+      const onglets = ['account', 'manage', 'roster', 'passwords', 'tracking'];
+      onglets.forEach(nom => {
+        const onglet = document.getElementById(`t-tab-${nom}`);
+        onglet.classList.remove('selected');
+        onglet.setAttribute('aria-selected', 'false');
+        onglet.tabIndex = -1;
+      });
+      const ongletApercu = document.getElementById('t-tab-preview');
+      ongletApercu.classList.add('selected');
+      ongletApercu.setAttribute('aria-selected', 'true');
+      ongletApercu.tabIndex = 0;
+      activerVueTest('student-space');
+    }
+
     function retournerVueEnseignant() {
       if (!enseignantConnecte || !modeApercuEnseignant) return;
       activerVueTest('teacher-space');
+      basculerOngletEnseignant(ongletEnseignantActif);
     }
 
     function activerVueTest(idSection) {
@@ -2880,6 +2925,7 @@
       }
       rafraichirQuetes();
       rendreTableauResultats();
+      actualiserNavigationModeTest();
     }
 
     // ONGLETS ÉLÈVE
@@ -2897,9 +2943,14 @@
     // ONGLETS ENSEIGNANT
     function basculerOngletEnseignant(onglet) {
       const onglets = ['account', 'manage', 'roster', 'passwords', 'tracking'];
+      if (onglet === 'preview') {
+        ouvrirVueEleveEnseignant();
+        return;
+      }
       if (!onglets.includes(onglet)) return;
       if (!enseignantConnecte && onglet !== 'account') return;
       document.querySelector('#teacher-space > nav').hidden = !enseignantConnecte;
+      ongletEnseignantActif = onglet;
       const idContenu = {
         account: 'teacher-account',
         manage: 'manage',
@@ -2914,6 +2965,18 @@
         tab.setAttribute('aria-selected', String(onglet === nom));
         tab.tabIndex = onglet === nom ? 0 : -1;
       });
+      const ongletApercu = document.getElementById('t-tab-preview');
+      ongletApercu.classList.remove('selected');
+      ongletApercu.setAttribute('aria-selected', 'false');
+      ongletApercu.tabIndex = -1;
+    }
+
+    function ouvrirCreationMission() {
+      if (!enseignantConnecte) return;
+      reinitialiserFormulaireQuete();
+      document.getElementById('quest-save-status').textContent = '';
+      basculerOngletEnseignant('manage');
+      document.getElementById('q-title').focus();
     }
 
     document.querySelectorAll('[role="tablist"]').forEach(tablist => {
