@@ -1377,23 +1377,31 @@
           if (!jeu || typeof jeu.id !== 'string' || !jeu.id.trim() ||
               typeof jeu.title !== 'string' || !jeu.title.trim() ||
               typeof jeu.description !== 'string' ||
-              typeof jeu.folder !== 'string' || !jeu.folder.trim()) {
-            throw new Error('Chaque jeu doit avoir un id, un titre, une description et un dossier.');
+              (jeu.folder !== undefined && typeof jeu.folder !== 'string') ||
+              (jeu.file !== undefined && typeof jeu.file !== 'string')) {
+            throw new Error('Chaque jeu doit avoir un id, un titre, une description et un chemin.');
           }
 
           const id = jeu.id.trim();
-          const dossier = jeu.folder.trim().replace(/\\/g, '/').replace(/\/+$/, '');
-          if (dossier.startsWith('/') || dossier.split('/').includes('..')) {
-            throw new Error(`Le dossier du jeu « ${jeu.title} » n’est pas un chemin relatif valide.`);
+          const dossier = (jeu.folder || '').trim().replace(/\\/g, '/').replace(/\/+$/, '');
+          const fichier = (jeu.file || '').trim().replace(/\\/g, '/');
+          if ((!dossier && !fichier) || (dossier && fichier)) {
+            throw new Error(`Le jeu « ${jeu.title} » doit indiquer un dossier ou un fichier, mais pas les deux.`);
           }
-          if (dossier === '.' && id !== 'chronoromain') {
+          if (dossier.startsWith('/') || dossier.split('/').includes('..') ||
+              fichier.startsWith('/') || fichier.split('/').includes('..')) {
+            throw new Error(`Le chemin du jeu « ${jeu.title} » n’est pas un chemin relatif valide.`);
+          }
+          if (!fichier && dossier === '.' && id !== 'chronoromain') {
             throw new Error(`Le jeu « ${jeu.title} » doit avoir son propre dossier avec un fichier index.html.`);
           }
 
           // ChronoRomain is still stored in the Hub root under its legacy filename.
-          const chemin = dossier === '.' && id === 'chronoromain'
-            ? './indexchiffresromains.html'
-            : `${dossier}/index.html`;
+          const chemin = fichier
+            ? `./${fichier}`
+            : dossier === '.' && id === 'chronoromain'
+              ? './indexchiffresromains.html'
+              : `${dossier}/index.html`;
           const url = new URL(chemin, document.baseURI);
           if (url.origin !== window.location.origin) {
             throw new Error(`Le jeu « ${jeu.title} » doit être hébergé dans le même site que le Hub.`);

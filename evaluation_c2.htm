@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détective Doc — Mode Téléphone (C2)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #c0392b;
+            --bg: #f4f6f7;
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 8px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            padding: 16px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        h1 { color: var(--primary); font-size: 1.35rem; }
+        .subtitle { font-size: 0.85rem; color: #7f8c8d; margin-top: 2px; }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* Page d'accueil */
+        .welcome-intro {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .rules-list {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+        .rules-list li { margin-bottom: 8px; margin-left: 20px; }
+
+        /* En-tête de progression et mission */
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar { width: 100%; height: 10px; background: #e2e8f0; border-radius: 5px; margin-bottom: 12px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.3s; }
+
+        .mission-box {
+            background: #2980b9;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid #f1c40f;
+        }
+        .mission-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #f1c40f; font-weight: bold; }
+        .mission-text { font-size: 1.05rem; font-weight: 600; margin-top: 4px; line-height: 1.4; }
+
+        /* Carte document unique (Grand format téléphone) */
+        .doc-card {
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 14px;
+            background: #fafafa;
+            margin-bottom: 15px;
+        }
+
+        .doc-card.correct { border-color: var(--success); background: #f0fdf4; }
+        .doc-card.incorrect { border-color: var(--danger); background: #fef2f2; }
+
+        .doc-title { font-size: 1.1rem; font-weight: bold; color: var(--primary); margin-bottom: 6px; }
+        .doc-meta { font-size: 0.9rem; color: #475569; background: #e2e8f0; padding: 8px; border-radius: 6px; margin-bottom: 10px; line-height: 1.4; }
+        .doc-content { font-size: 1.02rem; font-style: italic; margin-bottom: 14px; line-height: 1.5; color: #1e293b; }
+
+        .analysis-box { background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .analysis-box p { font-size: 0.88rem; font-weight: bold; color: #475569; margin-bottom: 8px; }
+        
+        /* Cases à cocher grandes et confortables pour le pouce */
+        .analysis-box label { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-size: 1rem; 
+            font-weight: 500;
+            cursor: pointer; 
+            margin-bottom: 10px; 
+            padding: 6px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        .analysis-box input[type="checkbox"] { transform: scale(1.5); margin-left: 4px; }
+
+        .explanation {
+            font-size: 0.92rem;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            line-height: 1.4;
+        }
+        .explanation.visible { display: block; }
+        .explanation.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .explanation.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        /* Boutons grands et ergonomiques */
+        .btn { 
+            background: var(--accent); 
+            color: white; 
+            border: none; 
+            padding: 14px 20px; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            width: 100%; 
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-save { background: var(--success); box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
+
+        /* Écran de fin & rapport */
+        .grade-card {
+            text-align: center;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            color: white;
+        }
+        .grade-A { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .grade-B { background: linear-gradient(135deg, #2980b9, #3498db); }
+        .grade-C { background: linear-gradient(135deg, #d35400, #f39c12); }
+        .grade-D { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+
+        .grade-letter { font-size: 3.2rem; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+        .grade-title { font-size: 1.15rem; font-weight: bold; }
+
+        .justification-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .justification-box h3 { color: var(--primary); margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+        .justification-text { font-size: 0.95rem; line-height: 1.5; margin-bottom: 12px; color: #334155; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+        .stat-item {
+            background: white;
+            padding: 10px 4px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .stat-val { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+        .stat-label { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+
+        .end-actions { display: flex; flex-direction: column; gap: 10px; }
+        .hub-save-status { min-height: 1.4em; color: #475569; font-size: 0.9rem; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🔍 Détective Doc</h1>
+        <p class="subtitle">Évaluation de la Compétence C2 (Critiquer)</p>
+    </header>
+
+    <!-- PAGE D'ACCUEIL -->
+    <div id="screen-welcome" class="screen active">
+        <div class="welcome-intro">
+            <h2 style="color: var(--primary); margin-bottom: 8px;">Bienvenue, Détective ! 🕵️‍♂️</h2>
+            <p>Tu vas analyser des documents un par un pour aider les historiens.</p>
+        </div>
+
+        <div class="rules-list">
+            <strong>📋 Comment ça se passe ? (4 étapes) :</strong>
+            <ul>
+                <li><strong>1. La mission :</strong> Lis bien la question posée en haut.</li>
+                <li><strong>2. Le document :</strong> Lis le texte, l'époque et le lieu du document affiché.</li>
+                <li><strong>3. Les critères :</strong> Coche les cases si le <strong>Sujet</strong>, l'<strong>Époque</strong> et le <strong>Lieu</strong> correspondent à la question.</li>
+                <li><strong>4. Le score :</strong> Tu analyseras 9 documents au total. À la fin, tu recevras ta cote (<strong>A, B, C ou D</strong>) et ton rapport !</li>
+            </ul>
+        </div>
+
+        <button class="btn" onclick="startGame()">C'est parti ! 🚀</button>
+    </div>
+
+    <!-- ÉCRAN DE JEU (1 document à la fois) -->
+    <div id="screen-game" class="screen">
+        <div class="progress-container">
+            <span id="progress-label">Document 1 / 9</span>
+            <span id="trio-name-label">Mission 1 : Base</span>
+        </div>
+        <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+
+        <div class="mission-box">
+            <div class="mission-title">🎯 Problématique :</div>
+            <div id="problem-text" class="mission-text">...</div>
+        </div>
+
+        <div id="single-doc-container"></div>
+
+        <button id="btn-validate" class="btn" onclick="validateDoc()">Vérifier ce document ✔️</button>
+        <button id="btn-next" class="btn" style="display:none;" onclick="nextDoc()">Document suivant ➔</button>
+    </div>
+
+    <!-- ÉCRAN DE FIN -->
+    <div id="screen-end" class="screen">
+        <div id="grade-card" class="grade-card">
+            <div id="grade-letter" class="grade-letter">A</div>
+            <div id="grade-title" class="grade-title">Maîtrise très satisfaisante</div>
+        </div>
+
+        <div class="justification-box">
+            <h3>📋 Justification officielle (C2)</h3>
+            <p id="justification-text" class="justification-text">...</p>
+
+            <h3>📊 Bilan par critère (sur 9)</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div id="stat-subj" class="stat-val">0/9</div>
+                    <div class="stat-label">📌 Sujet</div>
+                </div>
+                <div class="stat-item">
+                    <div id="stat-date" class="stat-val">0/9</div>
+                    <div class="stat-label">📅 Époque</div>
+                </div>
+                <div class="stat-item">
+                    <div id="stat-loc" class="stat-val">0/9</div>
+                    <div class="stat-label">🗺️ Lieu</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="end-actions">
+            <p id="hub-save-status" class="hub-save-status" role="status" aria-live="polite"></p>
+            <button class="btn btn-save" onclick="downloadReport()">💾 Télécharger mon rapport (.txt)</button>
+            <button class="btn" onclick="showScreen('screen-welcome')">Retour à l'accueil 🏠</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Liste plate de 9 documents (répartis en 3 trios de missions)
+    const allDocsList = [
+        // Trio 1 (Mission 1)
+        {
+            trioName: "Mission 1 / 3 : Niveau de base",
+            problem: "Quelle était l'influence de la religion dans la vie quotidienne en Égypte antique ?",
+            title: "Les offrandes dans les temples égyptiens",
+            date: "XIVe siècle av. J.-C.", loc: "Égypte antique",
+            text: "Chaque jour, les prêtres égyptiens offraient nourriture et encens aux statues des dieux pour garantir la crue du Nil et la paix du royaume.",
+            validSubj: true, validDate: true, validLoc: true,
+            explain: "Pertinent : Traite exactement de la place de la religion au quotidien en Égypte antique."
+        },
+        {
+            trioName: "Mission 1 / 3 : Niveau de base",
+            problem: "Quelle était l'influence de la religion dans la vie quotidienne en Égypte antique ?",
+            title: "La Constitution belge et la liberté de culte",
+            date: "1831", loc: "Belgique",
+            text: "La Constitution belge garantit à chaque citoyen la liberté des cultes et celle de manifester ses opinions en toute matière.",
+            validSubj: false, validDate: false, validLoc: false,
+            explain: "Non pertinent : Sujet, époque (1831) et lieu (Belgique) totalement hors-sujet."
+        },
+        {
+            trioName: "Mission 1 / 3 : Niveau de base",
+            problem: "Quelle était l'influence de la religion dans la vie quotidienne en Égypte antique ?",
+            title: "Les jeux olympiques en Grèce",
+            date: "Ve siècle av. J.-C.", loc: "Grèce antique",
+            text: "Tous les quatre ans, les cités grecques suspendaient leurs guerres pour honorer Zeus à travers des épreuves sportives.",
+            validSubj: true, validDate: true, validLoc: false,
+            explain: "Non pertinent : L'époque antique et le thème religieux sont proches, mais le lieu (Grèce) ne correspond pas à l'Égypte."
+        },
+        // Trio 2 (Mission 2)
+        {
+            trioName: "Mission 2 / 3 : Niveau intermédiaire",
+            problem: "Quelles ont été les conséquences de la Réforme protestante au XVIe siècle en Europe ?",
+            title: "La scission des Églises chrétiennes",
+            date: "XVIe siècle", loc: "Europe occidentale",
+            text: "Suite aux critiques de Martin Luther, l'Église chrétienne d'Occident se divise durablement entre catholiques et protestants.",
+            validSubj: true, validDate: true, validLoc: true,
+            explain: "Pertinent : Explique directement la conséquence majeure (le schisme) au XVIe siècle en Europe."
+        },
+        {
+            trioName: "Mission 2 / 3 : Niveau intermédiaire",
+            problem: "Quelles ont été les conséquences de la Réforme protestante au XVIe siècle en Europe ?",
+            title: "L'édit de Théodose",
+            date: "IVe siècle (380)", loc: "Empire romain",
+            text: "L'empereur Théodose fait du christianisme la seule religion officielle autorisée dans tout l'Empire romain.",
+            validSubj: false, validDate: false, validLoc: true,
+            explain: "Non pertinent : Concerne l'Antiquité (IVe siècle) et l'adoption du christianisme comme religion d'État, pas la Réforme."
+        },
+        {
+            trioName: "Mission 2 / 3 : Niveau intermédiaire",
+            problem: "Quelles ont été les conséquences de la Réforme protestante au XVIe siècle en Europe ?",
+            title: "L'expansion de l'Islam et l'Hégire",
+            date: "VIIe siècle (622)", loc: "Péninsule arabique",
+            text: "À partir de 622, la nouvelle religion monothéiste prêchée par Mahomet se diffuse rapidement hors d'Arabie.",
+            validSubj: false, validDate: false, validLoc: false,
+            explain: "Non pertinent : Traite des débuts de l'Islam au VIIe siècle en Arabie."
+        },
+        // Trio 3 (Mission 3)
+        {
+            trioName: "Mission 3 / 3 : Niveau expert",
+            problem: "Comment les relations entre chrétiens, juifs et musulmans s'organisaient-elles au Moyen Âge (cohabitations et conflits) ?",
+            title: "Échanges culturels à Tolède au XIIe siècle",
+            date: "XIIe siècle", loc: "Espagne médiévale",
+            text: "Dans l'école de traducteurs de Tolède, des savants juifs, chrétiens et musulmans travaillaient ensemble pour traduire des textes scientifiques.",
+            validSubj: true, validDate: true, validLoc: true,
+            explain: "Pertinent : Illustre les apports réciproques et la cohabitation entre les trois religions au Moyen Âge."
+        },
+        {
+            trioName: "Mission 3 / 3 : Niveau expert",
+            problem: "Comment les relations entre chrétiens, juifs et musulmans s'organisaient-elles au Moyen Âge (cohabitations et conflits) ?",
+            title: "La Déclaration des droits de l'homme et du citoyen",
+            date: "1789", loc: "France",
+            text: "Sous l'influence des philosophes des Lumières, l'article 10 affirme que nul ne doit être inquiété pour ses opinions, même religieuses.",
+            validSubj: false, validDate: false, validLoc: true,
+            explain: "Non pertinent : L'époque (XVIIIe siècle / Révolution française) ne correspond pas au Moyen Âge."
+        },
+        {
+            trioName: "Mission 3 / 3 : Niveau expert",
+            problem: "Comment les relations entre chrétiens, juifs et musulmans s'organisaient-elles au Moyen Âge (cohabitations et conflits) ?",
+            title: "Les temples du monde gréco-romain",
+            date: "Ier siècle av. J.-C.", loc: "Rome",
+            text: "Les citoyens romains participaient aux sacrifices publics pour s'assurer la protection des dieux de la cité.",
+            validSubj: false, validDate: false, validLoc: true,
+            explain: "Non pertinent : Époque antique et polythéisme romain (avant l'apparition de l'Islam)."
+        }
+    ];
+
+    let currentIndex = 0;
+    let subjScore = 0;
+    let dateScore = 0;
+    let locScore = 0;
+    let finalGradeData = {};
+    let questionResults = [];
+    let hubRequestId = null;
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function startGame() {
+        currentIndex = 0;
+        subjScore = 0;
+        dateScore = 0;
+        locScore = 0;
+        questionResults = [];
+        hubRequestId = null;
+        document.getElementById('hub-save-status').textContent = '';
+        showScreen('screen-game');
+        loadCurrentDoc();
+    }
+
+    function loadCurrentDoc() {
+        const doc = allDocsList[currentIndex];
+        
+        document.getElementById('progress-label').textContent = `Document ${currentIndex + 1} / 9`;
+        document.getElementById('trio-name-label').textContent = doc.trioName;
+        document.getElementById('progress').style.width = ((currentIndex) / allDocsList.length) * 100 + '%';
+        document.getElementById('problem-text').textContent = doc.problem;
+
+        document.getElementById('btn-validate').style.display = 'block';
+        document.getElementById('btn-next').style.display = 'none';
+
+        const container = document.getElementById('single-doc-container');
+        container.innerHTML = `
+            <div class="doc-card" id="active-card">
+                <div class="doc-title">📖 ${doc.title}</div>
+                <div class="doc-meta">📅 Époque : ${doc.date}<br>🗺️ Lieu : ${doc.loc}</div>
+                <div class="doc-content">"${doc.text}"</div>
+                
+                <div class="analysis-box">
+                    <p>Coche les critères corrects :</p>
+                    <label><input type="checkbox" id="chk-subj"> 📌 Sujet adapté</label>
+                    <label><input type="checkbox" id="chk-date"> 📅 Époque correcte</label>
+                    <label><input type="checkbox" id="chk-loc"> 🗺️ Lieu correspondant</label>
+                </div>
+                <div id="exp-box" class="explanation"></div>
+            </div>
+        `;
+    }
+
+    function validateDoc() {
+        const doc = allDocsList[currentIndex];
+        
+        const uSubj = document.getElementById('chk-subj').checked;
+        const uDate = document.getElementById('chk-date').checked;
+        const uLoc = document.getElementById('chk-loc').checked;
+
+        const okSubj = (uSubj === doc.validSubj);
+        const okDate = (uDate === doc.validDate);
+        const okLoc = (uLoc === doc.validLoc);
+
+        questionResults.push({
+            questionNumber: currentIndex + 1,
+            mission: doc.trioName,
+            problem: doc.problem,
+            document: doc.title,
+            date: doc.date,
+            location: doc.loc,
+            selected: { subject: uSubj, period: uDate, place: uLoc },
+            expected: { subject: doc.validSubj, period: doc.validDate, place: doc.validLoc },
+            correct: { subject: okSubj, period: okDate, place: okLoc }
+        });
+
+        if (okSubj) subjScore++;
+        if (okDate) dateScore++;
+        if (okLoc) locScore++;
+
+        const card = document.getElementById('active-card');
+        const expBox = document.getElementById('exp-box');
+        expBox.classList.add('visible');
+
+        if (okSubj && okDate && okLoc) {
+            card.classList.add('correct');
+            expBox.classList.add('success');
+            expBox.innerHTML = `<strong>✔️ Bravo, bonne analyse :</strong> ${doc.explain}`;
+        } else {
+            card.classList.add('incorrect');
+            expBox.classList.add('error');
+            expBox.innerHTML = `<strong>❌ Erreur :</strong> ${doc.explain}`;
+        }
+
+        document.getElementById('btn-validate').style.display = 'none';
+        document.getElementById('btn-next').style.display = 'block';
+        document.getElementById('progress').style.width = ((currentIndex + 1) / allDocsList.length) * 100 + '%';
+    }
+
+    function nextDoc() {
+        currentIndex++;
+        if (currentIndex < allDocsList.length) {
+            loadCurrentDoc();
+        } else {
+            computeFinalResult();
+        }
+    }
+
+    function computeFinalResult() {
+        showScreen('screen-end');
+
+        const totalCriteria = 27; // 9 documents * 3 critères
+        const totalScore = subjScore + dateScore + locScore;
+        const pct = Math.round((totalScore / totalCriteria) * 100);
+
+        document.getElementById('stat-subj').textContent = `${subjScore}/9`;
+        document.getElementById('stat-date').textContent = `${dateScore}/9`;
+        document.getElementById('stat-loc').textContent = `${locScore}/9`;
+
+        const card = document.getElementById('grade-card');
+        const letterElem = document.getElementById('grade-letter');
+        const titleElem = document.getElementById('grade-title');
+        const justifElem = document.getElementById('justification-text');
+
+        let weakCriteria = [];
+        if (subjScore < 7) weakCriteria.push(`le sujet (${subjScore}/9)`);
+        if (dateScore < 7) weakCriteria.push(`l'époque (${dateScore}/9)`);
+        if (locScore < 7) weakCriteria.push(`le lieu (${locScore}/9)`);
+
+        const diagnostic = weakCriteria.length > 0
+            ? ` Points à consolider : ${weakCriteria.join(", ")}.`
+            : " Maîtrise homogène des trois critères.";
+
+        let letter = "D";
+        let title = "Maîtrise insuffisante";
+        let text = "";
+
+        if (pct >= 85) {
+            letter = "A";
+            title = "Maîtrise très satisfaisante";
+            card.className = "grade-card grade-A";
+            text = `Cote A (${pct}% - ${totalScore}/27 critères) : L'élève analyse avec rigueur l'ensemble des critères (sujet, époque, lieu) sur l'ensemble du corpus documentaire.${diagnostic}`;
+        } else if (pct >= 70) {
+            letter = "B";
+            title = "Maîtrise satisfaisante";
+            card.className = "grade-card grade-B";
+            text = `Cote B (${pct}% - ${totalScore}/27 critères) : L'élève mobilise correctement les critères de pertinence, avec de légères hésitations sur les dossiers les plus complexes.${diagnostic}`;
+        } else if (pct >= 50) {
+            letter = "C";
+            title = "Maîtrise fragile (Niveau de base)";
+            card.className = "grade-card grade-C";
+            text = `Cote C (${pct}% - ${totalScore}/27 critères) : L'élève repère les erreurs évidentes, mais éprouve des difficultés à croiser simultanément les trois critères.${diagnostic}`;
+        } else {
+            letter = "D";
+            title = "Maîtrise insuffisante";
+            card.className = "grade-card grade-D";
+            text = `Cote D (${pct}% - ${totalScore}/27 critères) : L'élève ne parvient pas encore à vérifier méthodiquement les critères de pertinence requis.${diagnostic}`;
+        }
+
+        letterElem.textContent = letter;
+        titleElem.textContent = title;
+        justifElem.textContent = text;
+
+        finalGradeData = {
+            letter: letter,
+            title: title,
+            score: totalScore,
+            percentage: pct,
+            subj: subjScore,
+            date: dateScore,
+            loc: locScore,
+            justification: text,
+            dateEval: new Date().toLocaleString()
+        };
+        envoyerResultatAuHub();
+    }
+
+    function envoyerResultatAuHub() {
+        const status = document.getElementById('hub-save-status');
+        if (window.parent === window) {
+            status.textContent = 'Pour enregistrer ce résultat, lance le jeu depuis ton espace élève ChronoQuest.';
+            return;
+        }
+        if (hubRequestId) return;
+
+        hubRequestId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        status.textContent = 'Envoi automatique du résultat à ChronoQuest…';
+        window.parent.postMessage({
+            type: 'chronoquest-result',
+            requestId: hubRequestId,
+            gameId: 'detective-doc-c2',
+            score: finalGradeData.score,
+            maxScore: 27,
+            competencies: { C2: finalGradeData.percentage },
+            answers: {
+                game: 'Détective Doc — Évaluation C2',
+                grade: finalGradeData.letter,
+                gradeTitle: finalGradeData.title,
+                percentage: finalGradeData.percentage,
+                criteria: {
+                    subject: finalGradeData.subj,
+                    period: finalGradeData.date,
+                    place: finalGradeData.loc
+                },
+                questions: questionResults
+            }
+        }, '*');
+    }
+
+    function downloadReport() {
+        const content = `========================================
+ RAPPORT D'ÉVALUATION - DÉTECTIVE DOC (C2)
+========================================
+Date : ${finalGradeData.dateEval}
+
+COTE ATTRIBUÉE : ${finalGradeData.letter} (${finalGradeData.title})
+Score global : ${finalGradeData.score}/27 critères (${finalGradeData.percentage}%)
+
+DÉTAIL PAR CRITÈRE :
+- Sujet : ${finalGradeData.subj}/9
+- Époque : ${finalGradeData.date}/9
+- Lieu : ${finalGradeData.loc}/9
+
+JUSTIFICATION PÉDAGOGIQUE :
+${finalGradeData.justification}
+========================================`;
+
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Rapport_Evaluation_C2_Cote_${finalGradeData.letter}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    window.addEventListener('message', event => {
+        if (event.source !== window.parent || !event.data ||
+            event.data.type !== 'chronoquest-result-saved' ||
+            event.data.requestId !== hubRequestId) return;
+
+        const status = document.getElementById('hub-save-status');
+        if (event.data.saved === true) {
+            status.textContent = 'Résultat et réponses enregistrés dans ton espace élève ChronoQuest.';
+        } else {
+            hubRequestId = null;
+            status.textContent = `Résultat non enregistré : ${event.data.error || 'erreur inconnue'}`;
+        }
+    });
+</script>
+</body>
+</html>

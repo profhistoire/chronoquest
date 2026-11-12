@@ -3,12 +3,18 @@
     "id": "chronoromain",
     "title": "ChronoRomain",
     "description": "Le jeu existant",
-    "folder": ""
+    "folder": "."
   },
   {
     "id": "detective-doc.html",
     "title": "Détective Doc",
     "description": "Jeu de pertinence documentaire et d'analyse de sources",
     "folder": "jeux/"
+  },
+  {
+    "id": "detective-doc-c2",
+    "title": "Détective Doc — Évaluation C2",
+    "description": "Analyse 9 documents pour évaluer la pertinence du sujet, de l’époque et du lieu.",
+    "file": "evaluation_c2.htm"
   }
 ]

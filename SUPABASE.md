@@ -11,7 +11,7 @@ L’application enregistre dans `student_responses` les résultats des mini-jeux
 5. Dans **Authentication → Users**, crée le compte enseignant avec la même adresse que dans le script.
 6. Dans **Authentication → Settings**, désactive les inscriptions publiques. Dans **Authentication → Users**, invite ou crée ensuite un compte Supabase pour chaque élève avec son adresse scolaire. Fais définir à chaque élève son mot de passe ChronoQuest via une invitation si possible; ne lui demande pas son mot de passe scolaire. Supabase ne vérifie pas automatiquement le mot de passe du compte scolaire, sauf si un fournisseur d’identité de l’école a été spécifiquement configuré.
 7. Après avoir choisi l’adresse HTTPS de publication, ajoute-la dans **Authentication → URL Configuration → Redirect URLs**. Le lien de réinitialisation redirige vers la page d’accueil du Hub; cette URL doit être autorisée par Supabase.
-8. Publie `index.html`, `games.json`, `supabase-config.js` et les fichiers des jeux ensemble sur un hébergement web HTTPS. Pour ChronoRomain, conserve `indexchiffresromains.html` à la racine.
+8. Publie `index.html`, `games.json`, `supabase-config.js`, `evaluation_c2.htm` et les fichiers des jeux ensemble sur un hébergement web HTTPS. Pour ChronoRomain, conserve `indexchiffresromains.html` à la racine.
 9. Connecte-toi comme enseignante, puis importe la liste Excel/CSV (`email, nom, classe`) dans **Liste des Élèves**. La liste est alors partagée dans Supabase et chaque élève peut se connecter avec son adresse et son mot de passe ChronoQuest.
 10. Dans Supabase, ouvre **Table Editor → student_responses** pour consulter les résultats et **hub_games** pour consulter les missions.
 
@@ -19,7 +19,7 @@ Dans **Espace enseignant**, connecte-toi avec ce compte pour publier, modifier o
 
 ## Catalogue de jeux, exercices et réponses
 
-Le Hub lit [`games.json`](./games.json) pour afficher les jeux dans l’espace élève. Chaque entrée précise un `id`, un `title`, une `description` et un `folder`. Pour un nouveau jeu, crée le dossier indiqué avec son fichier `index.html`; ChronoRomain est conservé à la racine sous son nom de fichier actuel. Le bouton de chaque carte ouvre le jeu dans l’iframe du Hub : l’élève reste dans sa session, et le Hub peut recevoir les résultats transmis par le jeu.
+Le Hub lit [`games.json`](./games.json) pour afficher les jeux dans l’espace élève. Chaque entrée précise un `id`, un `title`, une `description` et soit un `folder` contenant `index.html`, soit un `file` relatif à la racine du Hub. ChronoRomain est conservé à la racine sous son nom de fichier actuel. Le bouton de chaque carte ouvre le jeu dans l’iframe du Hub : l’élève reste dans sa session, et le Hub peut recevoir les résultats transmis par le jeu.
 
 Le script ajoute les tables suivantes pour une architecture commune à différents types de jeux :
 
@@ -77,7 +77,7 @@ parent.postMessage({
 
 `answers` accepte un objet ou un tableau JSON jusqu’à 20 Ko. Si un jeu ne transmet pas `answers`, le score est quand même enregistré et ce champ reste vide. Les résultats saisis manuellement par l’enseignant sont enregistrés avec `source = teacher` et sans réponses détaillées.
 
-Dans **Détective Doc** ([`jeux/index.html`](./jeux/index.html)), le bouton « Enregistrer mes résultats » transmet le score et les réponses au Hub. Le Hub utilise la session élève déjà authentifiée pour renseigner `student_id` dans `student_responses`; le jeu n’accède pas directement à Supabase. L’enregistrement fonctionne lorsque le jeu est lancé depuis l’espace élève du Hub, pas lorsqu’on ouvre son fichier seul. L’aperçu enseignant refuse la sauvegarde.
+Dans l’ancien **Détective Doc** ([`jeux/index.html`](./jeux/index.html)), le bouton « Enregistrer mes résultats » transmet le score et les réponses au Hub. **Détective Doc — Évaluation C2** ([`evaluation_c2.htm`](./evaluation_c2.htm)) transmet automatiquement la note finale sur 27, les résultats des trois critères et les réponses par document à la fin du parcours. Les deux jeux utilisent `postMessage` : le Hub utilise la session élève déjà authentifiée pour renseigner `student_id` dans `student_responses`; les jeux ne se connectent pas directement à Supabase. L’enregistrement fonctionne lorsque le jeu est lancé depuis l’espace élève du Hub, pas lorsqu’on ouvre son fichier seul. L’aperçu enseignant refuse la sauvegarde.
 
 Les quatre compétences sont enregistrées sous les clés `C1`, `C2`, `C3` et `C4`, avec des valeurs de 0 à 100. Les anciens jeux qui envoient encore `observation`, `analyse` et `comprehension` sont acceptés temporairement et convertis en `C1`, `C2` et `C3`; `C4` restera vide jusqu’à ce que le jeu la transmette.
 
