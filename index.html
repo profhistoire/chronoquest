@@ -95,7 +95,43 @@
       box-shadow: 0 4px 0 var(--primary-dark);
     }
 
-    .header-actions { display: flex; gap: 12px; }
+    .site-menu { position: relative; }
+
+    .site-menu > summary {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border: 2px solid var(--primary-dark);
+      border-radius: 10px;
+      background: var(--primary);
+      color: #252b3a;
+      cursor: pointer;
+      font-weight: 900;
+      list-style: none;
+    }
+
+    .site-menu > summary::-webkit-details-marker { display: none; }
+    .site-menu > summary::after { content: "▾"; }
+    .site-menu[open] > summary::after { content: "▴"; }
+    .site-menu > summary:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+
+    .site-menu-panel {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      z-index: 30;
+      display: grid;
+      gap: 8px;
+      min-width: 230px;
+      padding: 12px;
+      background: var(--card-bg);
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .site-menu-panel button { width: 100%; text-align: left; }
 
     /* TYPOGRAPHIE & TITRES */
     h1, h2, h3 {
@@ -385,15 +421,16 @@
       }
 
       header.masthead {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
       }
 
-      .header-actions {
-        width: 100%;
-        flex-wrap: wrap;
-      }
+      .brand { gap: 8px; font-size: 1.05rem; }
+      .brand small { font-size: 0.62rem; }
+      .bolt { font-size: 1.35rem; padding: 5px 10px; }
+      .site-menu-panel { min-width: min(230px, calc(100vw - 48px)); }
 
       .cover {
         gap: 20px;
@@ -834,11 +871,13 @@
       <span class="bolt" aria-hidden="true">🧭</span>
       <span>CHRONOQUEST<small>LE CARNET DES AVENTURIERS DES CROYANCES</small></span>
     </a>
-    <nav class="header-actions" aria-label="Actions principales">
-      <button id="sound" class="quiet" onclick="alert('Option sonore à venir !')">🔊 Son</button>
-      <button id="student-open" class="primary" type="button" onclick="ouvrirEspaceEleve()">Espace élève / connexion</button>
-      <button id="teacher-open" class="quiet" type="button" onclick="ouvrirEspaceEnseignant()">Espace enseignant</button>
-    </nav>
+    <details id="site-menu" class="site-menu">
+      <summary><span aria-hidden="true">☰</span> Menu</summary>
+      <nav class="site-menu-panel" aria-label="Accès aux espaces">
+        <button id="student-open" class="primary" type="button" onclick="ouvrirEspaceEleve()">Espace élève / connexion</button>
+        <button id="teacher-open" class="quiet" type="button" onclick="ouvrirEspaceEnseignant()">Espace enseignant</button>
+      </nav>
+    </details>
   </header>
 
   <a class="skip-link" href="#main-content">Aller au contenu principal</a>
@@ -1440,13 +1479,13 @@
       const formulaire = document.getElementById('teacher-login-form');
       const sessionElement = document.getElementById('teacher-session');
       const ongletsEnseignant = document.querySelector('#teacher-space > nav');
-      const estConnecte = Boolean(session && enseignantConnecte);
+      const estConnecte = enseignantConnecte;
       actualiserBoutonEspaceEleve();
       ongletsEnseignant.hidden = !estConnecte;
       formulaire.hidden = estConnecte;
       sessionElement.hidden = !estConnecte;
       document.getElementById('teacher-session-email').textContent = estConnecte
-        ? `Connecté en tant que ${session.user.email}.`
+        ? `Connecté en tant que ${session?.user?.email || 'enseignant autorisé'}.`
         : '';
       document.getElementById('quest-form-fields').disabled = !estConnecte;
       document.getElementById('teacher-auth-status').textContent = message ||
@@ -2758,6 +2797,7 @@
 
     // NAVIGATION DE TEST
     function ouvrirEspaceEleve() {
+      document.getElementById('site-menu').open = false;
       if (modeApercuEnseignant) {
         retournerVueEnseignant();
         return;
@@ -2775,6 +2815,7 @@
     }
 
     function ouvrirEspaceEnseignant() {
+      document.getElementById('site-menu').open = false;
       activerVueTest('teacher-space');
       if (!enseignantConnecte) document.getElementById('teacher-email').focus();
     }
@@ -2858,6 +2899,7 @@
       const onglets = ['account', 'manage', 'roster', 'passwords', 'tracking'];
       if (!onglets.includes(onglet)) return;
       if (!enseignantConnecte && onglet !== 'account') return;
+      document.querySelector('#teacher-space > nav').hidden = !enseignantConnecte;
       const idContenu = {
         account: 'teacher-account',
         manage: 'manage',
