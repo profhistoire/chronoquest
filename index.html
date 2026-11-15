@@ -867,7 +867,7 @@
 <body>
   
   <header class="masthead">
-    <a class="brand" href="/" aria-label="ChronoQuest, accueil">
+    <a class="brand" href="./" aria-label="ChronoQuest, accueil">
       <span class="bolt" aria-hidden="true">🧭</span>
       <span>CHRONOQUEST<small>LE CARNET DES AVENTURIERS DES CROYANCES</small></span>
     </a>
@@ -1346,6 +1346,7 @@
     let quetesCatalogue = [];
     let meQuetes = [...QUETES_INTEGREES];
     let changementsQuetesEnAttente = [];
+    let idsQuetesMasques = new Set();
     let eleveConnecte = null;
     let modeApercuEnseignant = false;
     let modeReinitialisationMotDePasse = false;
@@ -1434,7 +1435,7 @@
         meQuetes = appliquerChangementsEnAttente(fusionnerQuetes(
           existantes,
           catalogue.filter(jeu => !meQuetes.some(quete => String(quete.id) === String(jeu.id)))
-        ));
+        )).filter(quete => !idsQuetesMasques.has(String(quete.id)));
         statut.hidden = true;
         statut.textContent = '';
         rafraichirQuetes();
@@ -1453,8 +1454,16 @@
     function appliquerChangementsEnAttente(quetes) {
       const resultat = new Map(quetes.map(quete => [String(quete.id), quete]));
       changementsQuetesEnAttente.forEach(changement => {
-        if (changement.type === 'delete') resultat.delete(String(changement.id));
-        else if (changement.quest) resultat.set(String(changement.id), changement.quest);
+        const id = String(changement.id);
+        if (changement.type === 'hide') {
+          idsQuetesMasques.add(id);
+          resultat.delete(id);
+        } else if (changement.type === 'delete') {
+          resultat.delete(id);
+        } else if (changement.quest) {
+          idsQuetesMasques.delete(id);
+          resultat.set(id, changement.quest);
+        }
       });
       return [...resultat.values()];
     }
@@ -1463,7 +1472,8 @@
       try {
         localStorage.setItem(CLE_CACHE_QUETES, JSON.stringify({
           quests: meQuetes,
-          pending: changementsQuetesEnAttente
+          pending: changementsQuetesEnAttente,
+          hiddenIds: [...idsQuetesMasques]
         }));
         return true;
       } catch (error) {
@@ -1481,7 +1491,12 @@
         const donnees = JSON.parse(cache);
         const quetesLocales = Array.isArray(donnees.quests) ? donnees.quests : [];
         changementsQuetesEnAttente = Array.isArray(donnees.pending) ? donnees.pending : [];
-        meQuetes = appliquerChangementsEnAttente(fusionnerQuetes(QUETES_INTEGREES, quetesLocales));
+        idsQuetesMasques = new Set(
+          Array.isArray(donnees.hiddenIds) ? donnees.hiddenIds.map(String) : []
+        );
+        meQuetes = appliquerChangementsEnAttente(
+          fusionnerQuetes(QUETES_INTEGREES, quetesLocales)
+        ).filter(quete => !idsQuetesMasques.has(String(quete.id)));
       } catch (error) {
         const detail = ` ${detailErreur(error)}`;
         document.getElementById('quest-save-status').textContent =
@@ -3012,7 +3027,8 @@
         classrooms: Array.isArray(ligne.classrooms) ? ligne.classrooms : ['*'],
         code: typeof ligne.code === 'string' ? ligne.code : '',
         url: typeof ligne.url === 'string' ? ligne.url : '',
-        imageData: typeof ligne.image_data === 'string' ? ligne.image_data : ''
+        imageData: typeof ligne.image_data === 'string' ? ligne.image_data : '',
+        hidden: ligne.is_hidden === true
       };
     }
 
@@ -3023,7 +3039,8 @@
         classrooms: classesCibles(quete),
         code: quete.code || null,
         url: quete.url || null,
-        image_data: quete.imageData || null
+        image_data: quete.imageData || null,
+        is_hidden: quete.hidden === true
       };
     }
 
@@ -3036,8 +3053,13 @@
         if (error) throw error;
         return;
       }
+      if (!changement.quest) {
+        throw new Error('Les informations du jeu à synchroniser sont absentes.');
+      }
+      const ligne = ligneDepuisQuete(changement.quest);
+      if (changement.type === 'hide') ligne.is_hidden = true;
       const { error } = await supabaseClient.from('hub_games')
-        .upsert(ligneDepuisQuete(changement.quest), { onConflict: 'id' });
+        .upsert(ligne, { onConflict: 'id' });
       if (error) throw error;
     }
 
@@ -3045,7 +3067,7 @@
       if (!supabaseClient) return;
       try {
         let { data, error } = await supabaseClient.from('hub_games')
-          .select('id,title,classrooms,code,url,image_data');
+          .select('id,title,classrooms,code,url,image_data,is_hidden');
         if (error) throw error;
 
         if (enseignantConnecte && changementsQuetesEnAttente.length > 0) {
@@ -3066,7 +3088,7 @@
               `Modifications locales en attente de synchronisation : ${erreursSynchronisation.join(' | ')}`;
           }
           const resultat = await supabaseClient.from('hub_games')
-            .select('id,title,classrooms,code,url,image_data');
+            .select('id,title,classrooms,code,url,image_data,is_hidden');
           if (resultat.error) throw resultat.error;
           data = resultat.data;
         }
@@ -3086,11 +3108,14 @@
               }
             : quete;
         });
+        idsQuetesMasques = new Set(
+          quetesDistant.filter(quete => quete.hidden).map(quete => String(quete.id))
+        );
         meQuetes = appliquerChangementsEnAttente(fusionnerQuetes(
           QUETES_INTEGREES,
           quetesCatalogue,
           quetesDistant
-        ));
+        )).filter(quete => !idsQuetesMasques.has(String(quete.id)));
         sauvegarderCacheQuetes();
         rafraichirQuetes();
         if (changementsQuetesEnAttente.length === 0) {
@@ -3117,10 +3142,17 @@
         changementsQuetesEnAttente = changementsQuetesEnAttente
           .filter(item => String(item.id) !== String(changement.id));
         const copieLocaleAJour = sauvegarderCacheQuetes();
-        document.getElementById('quest-save-status').textContent =
-          copieLocaleAJour
-            ? 'Mission et image sauvegardées dans Supabase et sur cet appareil.'
-            : 'Mission sauvegardée dans Supabase, mais la copie locale n’a pas pu être mise à jour.';
+        let message = '';
+        if (changement.type === 'hide') {
+          message = 'Jeu intégré retiré du catalogue élève et synchronisé avec Supabase.';
+        } else if (changement.type === 'delete') {
+          message = 'Mission supprimée de Supabase et de cet appareil.';
+        } else if (copieLocaleAJour) {
+          message = 'Mission et image sauvegardées dans Supabase et sur cet appareil.';
+        } else {
+          message = 'Mission sauvegardée dans Supabase, mais la copie locale n’a pas pu être mise à jour.';
+        }
+        document.getElementById('quest-save-status').textContent = message;
       } catch (error) {
         const detail = detailErreur(error);
         document.getElementById('quest-save-status').textContent =
@@ -3237,9 +3269,13 @@
 
     function supprimerQuete(id) {
       const quete = meQuetes.find(item => String(item.id) === String(id));
-      if (!enseignantConnecte || !quete || quete.integrated) return;
-      if (confirm(`Voulez-vous vraiment supprimer la mission « ${quete.title} » ?`)) {
-        const changement = { id: String(id), type: 'delete' };
+      if (!enseignantConnecte || !quete) return;
+      if (confirm(`Voulez-vous vraiment retirer « ${quete.title} » du catalogue élève ? Les résultats déjà enregistrés seront conservés.`)) {
+        const changement = {
+          id: String(id),
+          type: quete.integrated ? 'hide' : 'delete',
+          ...(quete.integrated ? { quest: quete } : {})
+        };
         meQuetes = meQuetes.filter(item => String(item.id) !== String(id));
         changementsQuetesEnAttente = changementsQuetesEnAttente
           .filter(item => String(item.id) !== String(id));
@@ -3280,26 +3316,28 @@
         ligne.appendChild(details);
         if (q.integrated) {
           const origine = document.createElement('small');
-          origine.textContent = 'Jeu intégré au Hub';
+          origine.textContent = 'Jeu fourni avec le Hub (non modifiable)';
           ligne.appendChild(origine);
-        } else {
-          const actions = document.createElement('div');
-          actions.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap;';
+        }
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap;';
+        if (!q.integrated) {
           const modifier = document.createElement('button');
           modifier.type = 'button';
           modifier.className = 'quiet';
           modifier.textContent = 'Modifier';
           modifier.disabled = !enseignantConnecte;
           modifier.addEventListener('click', () => modifierQuete(q.id));
-          const supprimer = document.createElement('button');
-          supprimer.type = 'button';
-          supprimer.className = 'danger';
-          supprimer.textContent = 'Supprimer';
-          supprimer.disabled = !enseignantConnecte;
-          supprimer.addEventListener('click', () => supprimerQuete(q.id));
-          actions.append(modifier, supprimer);
-          ligne.appendChild(actions);
+          actions.appendChild(modifier);
         }
+        const supprimer = document.createElement('button');
+        supprimer.type = 'button';
+        supprimer.className = 'danger';
+        supprimer.textContent = 'Supprimer';
+        supprimer.disabled = !enseignantConnecte;
+        supprimer.addEventListener('click', () => supprimerQuete(q.id));
+        actions.appendChild(supprimer);
+        ligne.appendChild(actions);
         item.appendChild(ligne);
         teacherContainer.appendChild(item);
       });

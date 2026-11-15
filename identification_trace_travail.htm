@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ChronoQuest — Trace ou Travail ?</title>
+  <style>
+    :root {
+      --primary: #1e293b;
+      --accent: #2563eb;
+      --trace-color: #b45309;
+      --trace-bg: #fef3c7;
+      --trace-border: #d97706;
+      --travail-color: #047857;
+      --travail-bg: #d1fae5;
+      --travail-border: #059669;
+      --bg: #e2e8f0;
+      --card: #ffffff;
+      --text: #0f172a;
+      --danger: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100dvh;
+      width: 100vw;
+      overflow: hidden;
+      background-color: var(--bg);
+      color: var(--text);
+      font-size: 19px;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 8px;
+      gap: 8px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--primary);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 16px;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 21px;
+      font-weight: 800;
+      font-family: Georgia, serif;
+    }
+
+    .btn-home {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: auto;
+    }
+
+    .btn-home:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .progress-dots {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      height: 6px;
+    }
+
+    .dot {
+      background: rgba(255,255,255,0.25);
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+
+    .dot.active { background: #60a5fa; }
+    .dot.ok { background: #34d399; }
+    .dot.ko { background: #f87171; }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    /* --- ACCUEIL --- */
+    .welcome-screen {
+      justify-content: space-between;
+      text-align: center;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .welcome-hero {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border: 2px solid #bfdbfe;
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .welcome-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--primary);
+      font-family: Georgia, serif;
+      margin-bottom: 6px;
+    }
+
+    /* Style du GIF de l'accueil réglé à 300px de large */
+    .welcome-gif {
+      width: 300px;
+      max-width: 100%;
+      height: auto;
+      border-radius: 16px;
+      margin-bottom: 10px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      border: 2px solid #93c5fd;
+    }
+
+    .welcome-intro {
+      font-size: 15px;
+      color: #334155;
+      line-height: 1.4;
+      margin-top: 4px;
+      font-weight: 500;
+      text-align: left;
+      background: white;
+      padding: 10px;
+      border-radius: 12px;
+      border-left: 4px solid var(--accent);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 100%;
+    }
+
+    .welcome-intro strong {
+      display: block;
+      margin-bottom: 4px;
+      font-family: Georgia, serif;
+      font-size: 17px;
+      color: var(--primary);
+    }
+
+    .menu-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-option {
+      background: #f8fafc;
+      border: 2px solid #cbd5e1;
+      border-bottom: 5px solid #94a3b8;
+      border-radius: 16px;
+      padding: 12px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.08s, border-color 0.2s;
+    }
+
+    .card-option:active {
+      transform: translateY(3px);
+      border-bottom-width: 2px;
+    }
+
+    .card-option h3 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 2px;
+      font-family: Georgia, serif;
+    }
+
+    .card-option p {
+      font-size: 15px;
+      color: #334155;
+      line-height: 1.3;
+      font-weight: 500;
+    }
+
+    .bareme-footer {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+      background: #f1f5f9;
+      padding: 8px;
+      border-radius: 12px;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* --- CONSIGNE ENTRAÎNEMENT TRÈS GRANDE --- */
+    .training-instruction {
+      background: #fefce8;
+      border: 2px solid #facc15;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      color: #713f12;
+      line-height: 1.35;
+      flex-shrink: 0;
+    }
+
+    /* --- CARTE DOCUMENT --- */
+    .doc-box {
+      flex: 1;
+      position: relative;
+      border: 2px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 14px;
+      background-color: #fdfbf7;
+      background-image: radial-gradient(#cbd5e1 0.8px, transparent 0.8px);
+      background-size: 14px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .doc-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+      z-index: 1;
+    }
+
+    .doc-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary);
+      font-family: Georgia, serif;
+    }
+
+    .doc-tag {
+      font-size: 14px;
+      font-weight: 700;
+      background: #e2e8f0;
+      color: #334155;
+      padding: 2px 10px;
+      border-radius: 8px;
+    }
+
+    .doc-content {
+      font-size: 20px;
+      line-height: 1.32;
+      color: #0f172a;
+      font-weight: 600;
+      z-index: 1;
+      font-family: Georgia, serif;
+    }
+
+    .doc-source {
+      font-size: 17px;
+      color: #1e293b;
+      font-style: italic;
+      background: rgba(226, 232, 240, 0.9);
+      border-left: 5px solid #64748b;
+      padding: 8px 12px;
+      border-radius: 8px;
+      line-height: 1.3;
+      z-index: 1;
+      text-align: left;
+      font-family: Georgia, serif;
+    }
+
+    .highlight-circle {
+      display: inline-block;
+      border: 3px solid var(--danger);
+      border-radius: 14px;
+      padding: 1px 8px;
+      background-color: #fee2e2;
+      color: #991b1b;
+      font-weight: 800;
+      font-style: normal;
+    }
+
+    /* --- CONTRÔLES & BOUTONS --- */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .question-prompt {
+      background: #fefce8;
+      border: 2px solid #facc15;
+      padding: 10px;
+      border-radius: 14px;
+      font-size: 19px;
+      font-weight: 800;
+      text-align: center;
+      color: #713f12;
+      line-height: 1.28;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      border-radius: 16px;
+      padding: 10px 8px;
+      font-size: 21px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.08s, border-bottom-width 0.08s;
+      min-height: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+
+    button:active {
+      transform: translateY(3px);
+      border-bottom-width: 2px !important;
+    }
+
+    .btn-trace {
+      background: var(--trace-bg);
+      color: var(--trace-color);
+      border: 2px solid var(--trace-border);
+      border-bottom: 6px solid var(--trace-border);
+    }
+
+    .btn-travail {
+      background: var(--travail-bg);
+      color: var(--travail-color);
+      border: 2px solid var(--travail-border);
+      border-bottom: 6px solid var(--travail-border);
+    }
+
+    .btn-sub {
+      font-size: 14px;
+      font-weight: 700;
+      opacity: 0.9;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      width: 100%;
+      font-size: 20px;
+      border: 2px solid #1d4ed8;
+      border-bottom: 6px solid #1e40af;
+      min-height: 56px;
+      border-radius: 16px;
+    }
+
+    .feedback-banner {
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      display: none;
+      line-height: 1.32;
+    }
+
+    .feedback-ok {
+      background: #dcfce7;
+      color: #166534;
+      border: 2px solid #22c55e;
+    }
+
+    .feedback-ko {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #ef4444;
+    }
+
+    .result-screen {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+      height: 100%;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .grade-badge {
+      font-size: 34px;
+      font-weight: 900;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      background: var(--accent);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    }
+
+    .bareme-recall {
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      background: #f1f5f9;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      line-height: 1.3;
+      width: 100%;
+    }
+
+    .sync-status {
+      font-size: 15px;
+      font-weight: 600;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      color: #334155;
+      width: 100%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <div class="header-top">
+      <h1>Trace ou Travail ?</h1>
+      <button class="btn-home" onclick="goHome()">Accueil</button>
+    </div>
+    <div class="progress-dots" id="progress-bar" style="display: none;">
+      <div class="dot" id="dot-0"></div>
+      <div class="dot" id="dot-1"></div>
+      <div class="dot" id="dot-2"></div>
+      <div class="dot" id="dot-3"></div>
+      <div class="dot" id="dot-4"></div>
+      <div class="dot" id="dot-5"></div>
+    </div>
+  </header>
+
+  <!-- ACCUEIL -->
+  <main id="welcome-screen" class="welcome-screen">
+    <div class="welcome-hero">
+      <div class="welcome-title">Détective du Passé</div>
+      <!-- Nouveau GIF animé en 300px placé juste en dessous du titre sur l'accueil -->
+      <img class="welcome-gif" src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGU0azR4cmhhczc5azh1aGR2NDRuMGd3aG1pZWdrcXprcjNld250aiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/vgA8e8a6MJECI72yD3/giphy.gif" alt="Animation Détective">
+      
+      <div class="welcome-intro">
+        <strong>Bienvenue !</strong>
+        Voici un exercice qui va vous permettre de travailler l'origine d'un document en histoire. Maîtriser cette compétence est une étape clé pour progresser positivement dans vos acquis scolaires et devenir un véritable historien !
+      </div>
+    </div>
+
+    <div class="menu-cards">
+      <div class="card-option" onclick="startMode('training')">
+        <h3>Mode Entraînement</h3>
+        <p>Un espace pour bien être sûr de comprendre ce qui est attendu de toi, avec des explications immédiates.</p>
+      </div>
+      <div class="card-option" onclick="startMode('test')">
+        <h3>Série Test (Évaluation)</h3>
+        <p>Attention : cette partie enregistrera tes résultats et me les enverra. Ne la réalise pas sans avoir vérifié que tu comprends bien tout !</p>
+      </div>
+    </div>
+
+    <div class="bareme-footer">
+      Barème officiel : <strong>A</strong> (0 faute) • <strong>B</strong> (1-2) • <strong>C</strong> (3-4) • <strong>D</strong> (5+) • <em>3 essais max</em>
+    </div>
+  </main>
+
+  <!-- JEU -->
+  <main id="game-screen" style="display: none;">
+    <div class="training-instruction" id="training-instruction-box" style="display: none;">
+      Consigne : <u><b>Analyser</b></u> la source et la date pour identifier s'il s'agit d'une trace ou d'un travail.
+    </div>
+
+    <div class="doc-box">
+      <div class="doc-header-row">
+        <div class="doc-title" id="doc-title">Document 1</div>
+        <span class="doc-tag">Archive</span>
+      </div>
+      <div class="doc-content" id="doc-content">Contenu...</div>
+      <div class="doc-source" id="doc-source">Source...</div>
+    </div>
+
+    <div class="feedback-banner" id="feedback-box"></div>
+
+    <div class="controls" id="controls-area">
+      <div class="question-prompt" id="question-text">Question...</div>
+      <div class="btn-group" id="choice-buttons">
+        <button class="btn-trace" onclick="checkAnswer('trace')">
+          <span>TRACE</span>
+          <span class="btn-sub">Témoin de l'époque</span>
+        </button>
+        <button class="btn-travail" onclick="checkAnswer('travail')">
+          <span>TRAVAIL</span>
+          <span class="btn-sub">Étude après coup</span>
+        </button>
+      </div>
+      <button class="btn-primary" id="next-btn" style="display: none;" onclick="nextStep()">Continuer</button>
+    </div>
+  </main>
+
+  <!-- RÉSULTAT -->
+  <main id="end-screen" class="result-screen">
+    <h2 style="font-size: 19px; font-family: Georgia, serif;" id="end-title">Résultat</h2>
+    <div class="grade-badge" id="grade-display">A</div>
+
+    <div class="bareme-recall" id="bareme-recall-box">
+      Rappel du barème : <strong>A</strong> (0 faute) | <strong>B</strong> (1-2 fautes) | <strong>C</strong> (3-4 fautes) | <strong>D</strong> (5+ fautes)
+    </div>
+    <p style="font-size: 15px; line-height: 1.25;" id="end-comment">Commentaire...</p>
+    <div class="sync-status" id="sync-status">Enregistrement en cours...</div>
+    <button class="btn-primary" onclick="goHome()">Retour au menu</button>
+  </main>
+</div>
+
+<script>
+  const masterTrainingPool = [
+    {
+      title: "Entraînement 1",
+      eventContext: "en 776 av. J.-C. (Grèce antique)",
+      content: "Liste gravée sur pierre des vainqueurs des premiers jeux olympiques.",
+      source: "Source : Inscription sur stèle en marbre à Olympie, VIIIe siècle av. J.-C.",
+      correct: "trace",
+      highlightSource: "Source : Inscription sur stèle en marbre à Olympie, <span class='highlight-circle'>VIIIe siècle av. J.-C.</span>",
+      explanation: "TRACE : la stèle a été gravée à l'époque même des faits."
+    },
+    {
+      title: "Entraînement 2",
+      eventContext: "en 776 av. J.-C. (Grèce antique)",
+      content: "« Les jeux olympiques antiques rassemblaient des athlètes de toute la Grèce. »",
+      source: "Source : P. Veyne (historien), La Grécité ancienne, 2010.",
+      correct: "travail",
+      highlightSource: "Source : <span class='highlight-circle'>P. Veyne (historien)</span>, La Grécité ancienne, <span class='highlight-circle'>2010</span>.",
+      explanation: "TRAVAIL : texte rédigé en 2010 par un chercheur moderne."
+    },
+    {
+      title: "Entraînement 3",
+      eventContext: "au Moyen Âge (1180)",
+      content: "Manuscrit enluminé montrant des paysans cultivant les champs avec une charrue.",
+      source: "Source : Psautier de Winchester, peint vers 1180.",
+      correct: "trace",
+      highlightSource: "Source : Psautier de Winchester, <span class='highlight-circle'>peint vers 1180</span>.",
+      explanation: "TRACE : l'image a été peinte directement au XIIe siècle."
+    },
+    {
+      title: "Entraînement 4",
+      eventContext: "au Moyen Âge (1200)",
+      content: "« L'économie seigneuriale repose essentiellement sur le servage et les corvées. »",
+      source: "Source : G. Duby (historien), Guerriers et Paysans, 1973.",
+      correct: "travail",
+      highlightSource: "Source : <span class='highlight-circle'>G. Duby (historien)</span>, Guerriers et Paysans, <span class='highlight-circle'>1973</span>.",
+      explanation: "TRAVAIL : étude d'historien publiée en 1973."
+    },
+    {
+      title: "Entraînement 5",
+      eventContext: "en l'an 79 (Antiquité romaine)",
+      content: "Lettre décrivant l'éruption du Vésuve et la mort de Pline l'Ancien.",
+      source: "Source : Pline le Jeune, Lettre à Tacite, vers 106 ap. J.-C.",
+      correct: "trace",
+      highlightSource: "Source : <span class='highlight-circle'>Pline le Jeune</span>, Lettre à Tacite, <span class='highlight-circle'>vers 106 ap. J.-C.</span>",
+      explanation: "TRACE : témoignage écrit de première main par un témoin direct."
+    },
+    {
+      title: "Entraînement 6",
+      eventContext: "en 500 avant J.-C. (Grèce antique)",
+      content: "Vase grec en céramique rouge représentant des hoplites spartiates.",
+      source: "Source : Peinture sur vase réalisée à Athènes, vers 500 av. J.-C.",
+      correct: "trace",
+      highlightSource: "Source : Peinture sur vase réalisée à Athènes, <span class='highlight-circle'>vers 500 av. J.-C.</span>",
+      explanation: "TRACE : objet fabriqué à l'époque classique."
+    },
+    {
+      title: "Entraînement 7",
+      eventContext: "au Ve siècle (Chute de Rome)",
+      content: "« L'Empire romain d'Occident s'effondre en 476 sous les assauts barbares. »",
+      source: "Source : Manuel d'Histoire 1re année, Éditions Belin, 2022.",
+      correct: "travail",
+      highlightSource: "Source : <span class='highlight-circle'>Manuel d'Histoire 1re année</span>, Éditions Belin, <span class='highlight-circle'>2022</span>.",
+      explanation: "TRAVAIL : manuel scolaire édité de nos jours."
+    },
+    {
+      title: "Entraînement 8",
+      eventContext: "en 1215 (Moyen Âge)",
+      content: "« Nous, Jean sans Terre, roi d'Angleterre, accordons cette charte à nos barons. »",
+      source: "Source : Texte officiel de la Magna Carta, 15 juin 1215.",
+      correct: "trace",
+      highlightSource: "Source : Texte officiel de la <em>Magna Carta</em>, <span class='highlight-circle'>15 juin 1215</span>.",
+      explanation: "TRACE : charte rédigée le jour même de l'événement."
+    },
+    {
+      title: "Entraînement 9",
+      eventContext: "en 52 av. J.-C. (Gaule)",
+      content: "« La bataille d'Alésia marqua la fin de la résistance gauloise menée par Vercingétorix. »",
+      source: "Source : J. Carcopino (historien), Jules César, 1965.",
+      correct: "travail",
+      highlightSource: "Source : <span class='highlight-circle'>J. Carcopino (historien)</span>, Jules César, <span class='highlight-circle'>1965</span>.",
+      explanation: "TRAVAIL : analyse historique publiée en 1965."
+    },
+    {
+      title: "Entraînement 10",
+      eventContext: "en Égypte ancienne (-1250)",
+      content: "Peinture murale de la vallée des Rois montrant des offrandes funéraires.",
+      source: "Source : Fresque de la tombe de Néfertari, XIIIe siècle av. J.-C.",
+      correct: "trace",
+      highlightSource: "Source : Fresque de la tombe de Néfertari, <span class='highlight-circle'>XIIIe siècle av. J.-C.</span>",
+      explanation: "TRACE : fresque issue directement de l'Antiquité."
+    },
+    {
+      title: "Entraînement 11",
+      eventContext: "en Égypte ancienne (-1250)",
+      content: "« Les pharaons se faisaient enterrer dans des tombes somptueuses pour leur voyage dans l'au-delà. »",
+      source: "Source : Égyptologue Christiane Desroches Noblecourt, 1996.",
+      correct: "travail",
+      highlightSource: "Source : <span class='highlight-circle'>Égyptologue Christiane Desroches Noblecourt</span>, <span class='highlight-circle'>1996</span>.",
+      explanation: "TRAVAIL : livre de recherche publié en 1996."
+    },
+    {
+      title: "Entraînement 12",
+      eventContext: "en Mésopotamie (-2000)",
+      content: "Tablette d'argile portant des inscriptions en écriture cunéiforme sur des comptes.",
+      source: "Source : Tablette archéologique découverte à Uruk, vers -2000.",
+      correct: "trace",
+      highlightSource: "Source : Tablette archéologique découverte à Uruk, <span class='highlight-circle'>vers -2000</span>.",
+      explanation: "TRACE : tablette écrite à l'époque mésopotamienne."
+    }
+  ];
+
+  const testQuestions = [
+    {
+      title: "Test - Document 1",
+      eventContext: "il y a 15 000 ans (Préhistoire)",
+      content: "Pointe de flèche en silex taillé retrouvée lors d'une fouille.",
+      source: "Source : Musée de la Préhistoire, outil taillé vers 13 000 av. J.-C.",
+      correct: "trace",
+      highlightSource: "Source : Musée de la Préhistoire, <span class='highlight-circle'>outil taillé vers 13 000 av. J.-C.</span>",
+      explanation: "L'outil date directement de la Préhistoire (témoin direct = trace)."
+    },
+    {
+      title: "Test - Document 2",
+      eventContext: "il y a 400 000 ans (Préhistoire)",
+      content: "« Les premiers humains maîtrisaient le feu pour se chauffer et cuire leurs aliments. »",
+      source: "Source : Manuel d'Histoire 1re année, éditions Hatier, 2024.",
+      correct: "travail",
+      highlightSource: "Source : <span class='highlight-circle'>Manuel d'Histoire 1re année, éditions Hatier, 2024</span>.",
+      explanation: "Texte rédigé en 2024 sur une période ancienne = travail d'auteur."
+    },
+    {
+      title: "Test - Document 3",
+      eventContext: "en 52 av. J.-C. (Antiquité)",
+      content: "« Je soussigné, Jules César, déclare la Gaule pacifiée après le siège d'Alésia. »",
+      source: "Source : Jules César, Commentaires sur la Guerre des Gaules, 52 av. J.-C.",
+      correct: "trace",
+      highlightSource: "Source : <span class='highlight-circle'>Jules César</span>, Commentaires sur la Guerre des Gaules, <span class='highlight-circle'>52 av. J.-C.</span>",
+      explanation: "Écrit par un acteur de l'événement à la même date = trace."
+    },
+    {
+      title: "Test - Document 4",
+      eventContext: "au IIe siècle après J.-C. (Antiquité)",
+      content: "Plan en 3D reconstituant l'aspect de la ville de Rome sous l'Empire.",
+      source: "Source : Maquette numérique réalisée par des archéologues, 2021.",
+      correct: "travail",
+      highlightSource: "Source : Maquette numérique <span class='highlight-circle'>réalisée par des archéologues, 2021</span>.",
+      explanation: "Reconstitution moderne par des chercheurs = travail."
+    },
+    {
+      title: "Test - Document 5",
+      eventContext: "en 15 av. J.-C. (Antiquité)",
+      content: "Pièce de monnaie en argent portant le portrait de l'empereur Auguste.",
+      source: "Source : Denier romain frappé à Lyon en 15 av. J.-C.",
+      correct: "trace",
+      highlightSource: "Source : Denier romain <span class='highlight-circle'>frappé à Lyon en 15 av. J.-C.</span>",
+      explanation: "Objet fabriqué à l'époque même = trace."
+    },
+    {
+      title: "Test - Document 6",
+      eventContext: "vers 3300 av. J.-C. (Antiquité)",
+      content: "« L'invention de l'écriture en Mésopotamie servait d'abord à compter les récoltes. »",
+      source: "Source : J. Bottéro (historien), Mésopotamie. L'écriture et les dieux, 1987.",
+      correct: "travail",
+      highlightSource: "Source : <span class='highlight-circle'>J. Bottéro (historien)</span>, Mésopotamie..., <span class='highlight-circle'>1987</span>.",
+      explanation: "Analyse d'un historien moderne en 1987 = travail."
+    }
+  ];
+
+  let currentMode = 'test';
+  let activeQuestions = [];
+  let currentIndex = 0;
+  let errorsCount = 0;
+  let details = [];
+  let localTestAttempts = 0;
+  let resultRequestId = '';
+  let resultAcknowledgementTimeout = null;
+
+  function shuffleArray(array) {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function goHome() {
+    document.getElementById("game-screen").style.display = "none";
+    document.getElementById("end-screen").style.display = "none";
+    document.getElementById("welcome-screen").style.display = "flex";
+    document.getElementById("progress-bar").style.display = "none";
+  }
+
+  function startMode(mode) {
+    currentMode = mode;
+    currentIndex = 0;
+    errorsCount = 0;
+    details = [];
+
+    if (mode === 'training') {
+      activeQuestions = shuffleArray(masterTrainingPool).slice(0, 6);
+      document.getElementById("training-instruction-box").style.display = "block";
+    } else {
+      let attempts = localTestAttempts;
+      try {
+        const storedAttempts = parseInt(localStorage.getItem('cq_trace_attempts') || '0', 10);
+        if (Number.isFinite(storedAttempts)) attempts = storedAttempts;
+      } catch {
+        // Sandboxed Hub games have an opaque origin and cannot access localStorage.
+      }
+      if (attempts >= 3) {
+        alert("Tu as atteint le maximum de 3 essais pour cette série test. Continue à t'entraîner !");
+        return;
+      }
+      localTestAttempts = attempts + 1;
+      try {
+        localStorage.setItem('cq_trace_attempts', localTestAttempts);
+      } catch {
+        // Keep the attempt limit for this page session when storage is unavailable.
+      }
+      activeQuestions = testQuestions;
+      document.getElementById("training-instruction-box").style.display = "none";
+    }
+
+    document.getElementById("progress-bar").style.display = "grid";
+    for (let i = 0; i < 6; i++) {
+      document.getElementById(`dot-${i}`).className = "dot";
+    }
+
+    document.getElementById("welcome-screen").style.display = "none";
+    document.getElementById("end-screen").style.display = "none";
+    document.getElementById("game-screen").style.display = "flex";
+    renderStep();
+  }
+
+  function renderStep() {
+    const q = activeQuestions[currentIndex];
+    document.getElementById("doc-title").textContent = q.title;
+    document.getElementById("doc-content").innerHTML = q.content;
+    document.getElementById("doc-source").innerHTML = q.source;
+
+    document.getElementById(`dot-${currentIndex}`).classList.add("active");
+
+    const feedbackBox = document.getElementById("feedback-box");
+    feedbackBox.style.display = "none";
+
+    document.getElementById("choice-buttons").style.display = "grid";
+    document.getElementById("question-text").style.display = "block";
+    document.getElementById("question-text").innerHTML = `Si l'événement s'est déroulé <u>${q.eventContext}</u>, ce document est :`;
+    document.getElementById("next-btn").style.display = "none";
+  }
+
+  function checkAnswer(userChoice) {
+    const q = activeQuestions[currentIndex];
+    const isCorrect = (userChoice === q.correct);
+
+    if (!isCorrect) errorsCount++;
+
+    const dot = document.getElementById(`dot-${currentIndex}`);
+    dot.classList.remove("active");
+    dot.classList.add(isCorrect ? "ok" : "ko");
+
+    details.push({
+      question: q.title,
+      choix_eleve: userChoice,
+      attendu: q.correct,
+      reussi: isCorrect
+    });
+
+    document.getElementById("doc-source").innerHTML = q.highlightSource;
+
+    const feedbackBox = document.getElementById("feedback-box");
+    feedbackBox.style.display = "block";
+    feedbackBox.className = "feedback-banner " + (isCorrect ? "feedback-ok" : "feedback-ko");
+    feedbackBox.innerHTML = (isCorrect ? "Correct : " : "Incorrect : ") + q.explanation;
+
+    document.getElementById("choice-buttons").style.display = "none";
+    document.getElementById("question-text").style.display = "none";
+
+    const nextBtn = document.getElementById("next-btn");
+    nextBtn.style.display = "flex";
+    nextBtn.textContent = (currentIndex === activeQuestions.length - 1) ? "Voir mon résultat final" : "Question suivante";
+  }
+
+  function nextStep() {
+    currentIndex++;
+    if (currentIndex < activeQuestions.length) {
+      renderStep();
+    } else {
+      finishGame();
+    }
+  }
+
+  async function finishGame() {
+    document.getElementById("game-screen").style.display = "none";
+    document.getElementById("progress-bar").style.display = "none";
+    document.getElementById("end-screen").style.display = "flex";
+
+    const gradeDisplay = document.getElementById("grade-display");
+    const baremeRecallBox = document.getElementById("bareme-recall-box");
+    const endComment = document.getElementById("end-comment");
+    const syncStatus = document.getElementById("sync-status");
+
+    baremeRecallBox.style.display = "block";
+
+    let grade = 'D';
+    if (errorsCount === 0) grade = 'A';
+    else if (errorsCount <= 2) grade = 'B';
+    else if (errorsCount <= 4) grade = 'C';
+    else grade = 'D';
+
+    gradeDisplay.textContent = grade;
+    endComment.innerHTML = `Nombre de fautes : <strong>${errorsCount}</strong> / 6`;
+
+    if (currentMode === 'training') {
+      syncStatus.textContent = "Mode entraînement : non noté (pour info).";
+      syncStatus.style.background = "#f1f5f9";
+      syncStatus.style.color = "#334155";
+      return;
+    }
+
+    if (window.parent === window) {
+      syncStatus.textContent = "Pour enregistrer ce résultat, lance le jeu depuis ton espace élève ChronoQuest.";
+      return;
+    }
+
+    resultRequestId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    syncStatus.textContent = "Envoi du résultat à ChronoQuest…";
+    window.parent.postMessage({
+      type: "chronoquest-result",
+      requestId: resultRequestId,
+      gameId: "identification_trace_travail",
+      score: activeQuestions.length - errorsCount,
+      maxScore: activeQuestions.length,
+      answers: {
+        game: "Trace ou Travail ?",
+        grade,
+        errors: errorsCount,
+        questions: details
+      }
+    }, "*");
+
+    resultAcknowledgementTimeout = window.setTimeout(() => {
+      if (!resultRequestId) return;
+      syncStatus.textContent = "Aucune confirmation reçue du Hub. Vérifie que tu es connecté et que le jeu est lancé depuis ChronoQuest.";
+      resultRequestId = '';
+    }, 10000);
+  }
+
+  window.addEventListener("message", event => {
+    if (event.source !== window.parent || !event.data ||
+        event.data.type !== "chronoquest-result-saved" ||
+        event.data.requestId !== resultRequestId) return;
+
+    window.clearTimeout(resultAcknowledgementTimeout);
+    resultRequestId = '';
+    const syncStatus = document.getElementById("sync-status");
+    if (event.data.saved === true) {
+      syncStatus.textContent = "Résultat et réponses enregistrés dans ton espace élève ChronoQuest.";
+      syncStatus.style.background = "#dcfce7";
+      syncStatus.style.color = "#166534";
+    } else {
+      syncStatus.textContent = `Résultat non enregistré : ${event.data.error || "Vérifie ta connexion à ChronoQuest."}`;
+      syncStatus.style.background = "#fee2e2";
+      syncStatus.style.color = "#991b1b";
+    }
+  });
+</script>
+
+</body>
+</html>

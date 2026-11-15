@@ -5,7 +5,7 @@ L’application enregistre dans `student_responses` les résultats des mini-jeux
 ## Mise en place
 
 1. Crée un projet sur [Supabase](https://supabase.com/).
-2. Dans **SQL Editor**, vérifie que l’adresse de connexion de l’enseignante à la fin de [`supabase-setup.sql`](./supabase-setup.sql) est bien celle du compte Supabase enseignant, puis exécute le script. Il crée ou complète les tables `student_responses`, `student_roster`, `hub_games`, `game_exercises` et `student_answers`, ainsi que leurs règles d’accès. Le script est additif : il ne supprime pas les tables ni leurs données.
+2. Dans **SQL Editor**, vérifie que l’adresse de connexion de l’enseignante à la fin de [`supabase-setup.sql`](./supabase-setup.sql) est bien celle du compte Supabase enseignant, puis exécute le script. Il crée ou complète les tables `student_responses`, `student_roster`, `hub_games`, `game_exercises` et `student_answers`, ainsi que leurs règles d’accès et la colonne `hub_games.is_hidden`. Le script est additif : il ne supprime pas les tables ni leurs données.
 3. Dans les paramètres API du projet, copie l’URL du projet et sa clé publique `anon`/publishable.
 4. Remplace les deux valeurs d’exemple dans [`supabase-config.js`](./supabase-config.js).
 5. Dans **Authentication → Users**, crée le compte enseignant avec la même adresse que dans le script.
@@ -15,7 +15,7 @@ L’application enregistre dans `student_responses` les résultats des mini-jeux
 9. Connecte-toi comme enseignante, puis importe la liste Excel/CSV (`email, nom, classe`) dans **Liste des Élèves**. La liste est alors partagée dans Supabase et chaque élève peut se connecter avec son adresse et son mot de passe ChronoQuest.
 10. Dans Supabase, ouvre **Table Editor → student_responses** pour consulter les résultats et **hub_games** pour consulter les missions.
 
-Dans **Espace enseignant**, connecte-toi avec ce compte pour publier, modifier ou supprimer les missions. Le Hub garde aussi une copie locale et retente de synchroniser les modifications en attente au prochain accès enseignant. Chaque mission peut avoir une image de couverture (PNG, JPEG, WebP ou GIF, maximum 500 Ko); elle est intégrée à la mission et suit ses modifications et suppressions. Les missions disponibles sont chargées depuis Supabase pour tous les élèves. Le mini-jeu lui-même reste du HTML/JavaScript saisi dans le formulaire; les fichiers d’un jeu doivent être hébergés avec le Hub.
+Dans **Espace enseignant**, connecte-toi avec ce compte pour publier, modifier ou supprimer les missions. Les jeux fournis par le Hub ne sont pas modifiables, mais leur bouton **Supprimer** les retire du catalogue pour les élèves; leur masquage est mémorisé dans `hub_games.is_hidden`. Le Hub garde aussi une copie locale et retente de synchroniser les modifications en attente au prochain accès enseignant. Chaque mission peut avoir une image de couverture (PNG, JPEG, WebP ou GIF, maximum 500 Ko); elle est intégrée à la mission et suit ses modifications et suppressions. Les missions disponibles sont chargées depuis Supabase pour tous les élèves. Le mini-jeu lui-même reste du HTML/JavaScript saisi dans le formulaire; les fichiers d’un jeu doivent être hébergés avec le Hub.
 
 ## Catalogue de jeux, exercices et réponses
 
@@ -78,6 +78,8 @@ parent.postMessage({
 `answers` accepte un objet ou un tableau JSON jusqu’à 20 Ko. Si un jeu ne transmet pas `answers`, le score est quand même enregistré et ce champ reste vide. Les résultats saisis manuellement par l’enseignant sont enregistrés avec `source = teacher` et sans réponses détaillées.
 
 Dans l’ancien **Détective Doc** ([`jeux/index.html`](./jeux/index.html)), le bouton « Enregistrer mes résultats » transmet le score et les réponses au Hub. **Détective Doc — Évaluation C2** ([`evaluation_c2.htm`](./evaluation_c2.htm)) transmet automatiquement la note finale sur 27, les résultats des trois critères et les réponses par document à la fin du parcours. Les deux jeux utilisent `postMessage` : le Hub utilise la session élève déjà authentifiée pour renseigner `student_id` dans `student_responses`; les jeux ne se connectent pas directement à Supabase. L’enregistrement fonctionne lorsque le jeu est lancé depuis l’espace élève du Hub, pas lorsqu’on ouvre son fichier seul. L’aperçu enseignant refuse la sauvegarde.
+
+**Trace ou Travail ?** ([`identification_trace_travail.htm`](./identification_trace_travail.htm)) est également proposé dans le catalogue `games.json`. À la fin du mode test, il envoie la note sur 6 et les choix détaillés au Hub, puis affiche la confirmation seulement après l’accusé de réception de Supabase. Le mode entraînement n’enregistre pas de résultat.
 
 Les quatre compétences sont enregistrées sous les clés `C1`, `C2`, `C3` et `C4`, avec des valeurs de 0 à 100. Les anciens jeux qui envoient encore `observation`, `analyse` et `comprehension` sont acceptés temporairement et convertis en `C1`, `C2` et `C3`; `C4` restera vide jusqu’à ce que le jeu la transmette.
 

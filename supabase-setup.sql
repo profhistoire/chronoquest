@@ -39,12 +39,14 @@ create table if not exists public.hub_games (
   code text,
   url text,
   image_data text,
+  is_hidden boolean not null default false,
   updated_at timestamptz not null default now()
 );
 
 alter table public.hub_games
   add column if not exists description text not null default '',
-  add column if not exists game_type text not null default 'quiz';
+  add column if not exists game_type text not null default 'quiz',
+  add column if not exists is_hidden boolean not null default false;
 
 alter table public.hub_games enable row level security;
 revoke all on table public.hub_games from public, anon, authenticated;

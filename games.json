@@ -16,5 +16,11 @@
     "title": "Détective Doc — Évaluation C2",
     "description": "Analyse 9 documents pour évaluer la pertinence du sujet, de l’époque et du lieu.",
     "file": "evaluation_c2.htm"
+  },
+  {
+    "id": "identification_trace_travail",
+    "title": "Trace ou Travail ?",
+    "description": "Distingue les traces du passé des travaux d’historiens.",
+    "file": "identification_trace_travail.htm"
   }
 ]
