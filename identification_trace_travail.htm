@@ -465,27 +465,34 @@
     @media (max-width: 600px) {
       #game-screen {
         min-height: 0;
-        overflow-x: hidden;
-        overflow-y: auto;
+        overflow: hidden;
       }
 
       #game-screen .doc-box {
-        flex: 0 0 auto;
-        min-height: 260px;
+        flex: 1 1 0;
+        min-height: 0;
         gap: 12px;
-        overflow: visible;
+        justify-content: flex-start;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
 
       .training-instruction {
         font-size: clamp(17px, 4.8vw, 20px);
       }
 
-      .doc-content {
+      #game-screen .doc-header-row,
+      #game-screen .doc-content,
+      #game-screen .doc-source {
+        flex-shrink: 0;
+      }
+
+      #game-screen .doc-content {
         font-size: clamp(17px, 4.8vw, 20px);
         overflow-wrap: anywhere;
       }
 
-      .doc-source {
+      #game-screen .doc-source {
         overflow-wrap: anywhere;
       }
     }
