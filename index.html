@@ -441,11 +441,13 @@
       }
 
       .tabs {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .tabs button {
-        flex: 1 1 160px;
+        width: 100%;
+        min-width: 0;
       }
     }
 
@@ -852,6 +854,32 @@
       .cover-art { transform: none; }
       #student-form > div { flex-wrap: wrap; }
       #student-form .primary { width: 100%; }
+      button {
+        max-width: 100%;
+        min-height: 44px;
+        font-size: 0.95rem;
+        line-height: 1.3;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+      button.primary, button.quiet, button.danger { padding: 11px 14px; }
+      .tabs {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+      .tabs button { padding: 11px 14px; text-align: left; }
+      .quest-auth-actions { align-items: stretch; }
+      .quest-auth-actions button { flex: 1 1 100%; }
+      #student-space > .paper:first-child {
+        flex-wrap: wrap;
+        justify-content: flex-start !important;
+        gap: 14px;
+      }
+      #student-space > .paper:first-child > div:last-child {
+        flex-wrap: wrap;
+        width: 100%;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
