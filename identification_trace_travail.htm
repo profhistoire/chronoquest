@@ -461,6 +461,34 @@
       width: 100%;
       text-align: center;
     }
+
+    @media (max-width: 600px) {
+      #game-screen {
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      #game-screen .doc-box {
+        flex: 0 0 auto;
+        min-height: 260px;
+        gap: 12px;
+        overflow: visible;
+      }
+
+      .training-instruction {
+        font-size: clamp(17px, 4.8vw, 20px);
+      }
+
+      .doc-content {
+        font-size: clamp(17px, 4.8vw, 20px);
+        overflow-wrap: anywhere;
+      }
+
+      .doc-source {
+        overflow-wrap: anywhere;
+      }
+    }
   </style>
 </head>
 <body>
