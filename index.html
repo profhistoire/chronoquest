@@ -1720,15 +1720,14 @@
       bouton.disabled = true;
       statut.textContent = 'Envoi du lien de réinitialisation…';
       try {
-        const redirectTo = `${window.location.origin}${window.location.pathname}`;
         const { error } = await supabaseClient.auth.resetPasswordForEmail(
           emailInput.value.trim().toLocaleLowerCase('fr'),
-          { redirectTo }
+          { redirectTo: 'https://profhistoire.github.io/chronoquest/' }
         );
         if (error) throw error;
         statut.textContent = 'Si un compte existe pour cette adresse, un e-mail contenant le lien de réinitialisation va être envoyé. Vérifie aussi les courriers indésirables.';
       } catch (error) {
-        statut.textContent = `Impossible d’envoyer le lien : ${detailErreur(error)}. Vérifie les URL de redirection autorisées dans Supabase.`;
+        statut.textContent = `Impossible d’envoyer le lien : ${detailErreur(error)}. Vérifie le SMTP et les URL de redirection autorisées dans Supabase.`;
       } finally {
         bouton.disabled = false;
       }

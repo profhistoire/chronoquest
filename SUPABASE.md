@@ -51,7 +51,15 @@ supabase link --project-ref dpmbygacgygczrnvozjb
 supabase functions deploy reset-student-password
 ```
 
-Le mot de passe provisoire ne s’expire pas automatiquement. Transmets-le à l’élève par un canal privé et demande-lui de le remplacer; le lien « Mot de passe oublié ? » nécessite un fournisseur SMTP configuré.
+Le mot de passe provisoire ne s’expire pas automatiquement. Transmets-le à l’élève par un canal privé et demande-lui de le remplacer.
+
+### Dépannage des e-mails de réinitialisation
+
+Le bouton « Mot de passe oublié ? » appelle bien `resetPasswordForEmail` de Supabase Auth. Toutefois, l’envoi dépend de la configuration e-mail du projet Supabase et ne peut pas être vérifié depuis le code du Hub.
+
+Le SMTP fourni par défaut par Supabase est réservé aux essais : il n’envoie qu’aux adresses autorisées de l’équipe du projet et limite actuellement l’envoi à environ 2 messages par heure. Les élèves ne recevront donc généralement pas de message tant qu’un SMTP personnalisé n’est pas configuré. Dans **Supabase → Authentication → SMTP Settings**, active un fournisseur SMTP, renseigne son hôte, son port et ses identifiants, ainsi qu’une adresse d’expéditeur autorisée par ce fournisseur. Consulte aussi **Authentication → Rate Limits** si plusieurs demandes ont été faites.
+
+Vérifie ensuite que l’adresse exacte de l’élève existe dans **Authentication → Users**, que l’adresse HTTPS du Hub figure dans **Authentication → URL Configuration → Redirect URLs**, et demande à l’élève de contrôler les courriers indésirables. Le Hub masque volontairement si un compte existe : un message de succès ne garantit donc pas qu’un e-mail a été délivré. En cas d’erreur affichée, consulte également les journaux Auth du projet Supabase.
 
 ## Format des réponses des mini-jeux
 
