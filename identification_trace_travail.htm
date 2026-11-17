@@ -463,22 +463,56 @@
     }
 
     @media (max-width: 600px) {
+      html, body {
+        font-size: 15px;
+      }
+
+      .app-container {
+        padding: 6px;
+        gap: 6px;
+      }
+
+      header {
+        gap: 4px;
+        padding: 8px 10px;
+      }
+
+      header h1 { font-size: 18px; }
+      .btn-home { padding: 5px 9px; font-size: 12px; }
+
+      main {
+        min-height: 0;
+        padding: 8px;
+        gap: 6px;
+      }
+
+      .welcome-title { font-size: 19px; }
+      .welcome-intro { font-size: 13px; padding: 8px; }
+      .welcome-intro strong { font-size: 15px; }
+      .card-option { padding: 9px 10px; }
+      .card-option h3 { font-size: 16px; }
+      .card-option p { font-size: 13px; }
+      .bareme-footer { font-size: 12px; padding: 6px; }
+
       #game-screen {
         min-height: 0;
         overflow: hidden;
       }
 
       #game-screen .doc-box {
-        flex: 1 1 0;
-        min-height: 0;
-        gap: 12px;
+        flex: 1 1 auto;
+        min-height: 100px;
+        padding: 8px;
+        gap: 8px;
         justify-content: flex-start;
         overflow-x: hidden;
         overflow-y: auto;
       }
 
       .training-instruction {
-        font-size: clamp(17px, 4.8vw, 20px);
+        padding: 6px 8px;
+        font-size: 14px;
+        line-height: 1.2;
       }
 
       #game-screen .doc-header-row,
@@ -487,14 +521,42 @@
         flex-shrink: 0;
       }
 
+      .doc-header-row { padding-bottom: 4px; }
+      .doc-title { font-size: 15px; }
+      .doc-tag { padding: 2px 6px; font-size: 11px; }
       #game-screen .doc-content {
-        font-size: clamp(17px, 4.8vw, 20px);
+        font-size: 14px;
+        line-height: 1.2;
         overflow-wrap: anywhere;
       }
 
       #game-screen .doc-source {
+        padding: 6px 8px;
+        font-size: 12px;
+        line-height: 1.2;
         overflow-wrap: anywhere;
       }
+
+      .controls { gap: 6px; }
+      .question-prompt {
+        padding: 6px;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+      .btn-group { gap: 6px; }
+      button {
+        min-height: 48px;
+        padding: 6px 4px;
+        border-radius: 12px;
+        font-size: 16px;
+      }
+      .btn-sub { font-size: 11px; }
+      .btn-primary { min-height: 44px; font-size: 15px; }
+      .feedback-banner { padding: 6px 8px; font-size: 14px; }
+      .result-screen { gap: 6px; }
+      .grade-badge { width: 54px; height: 54px; font-size: 28px; }
+      .bareme-recall { font-size: 12px; }
+      .sync-status { padding: 6px 8px; font-size: 13px; }
     }
   </style>
 </head>

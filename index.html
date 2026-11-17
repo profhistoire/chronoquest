@@ -854,6 +854,16 @@
       .cover-art { transform: none; }
       #student-form > div { flex-wrap: wrap; }
       #student-form .primary { width: 100%; }
+      #game-dialog {
+        width: calc(100vw - 16px);
+        max-width: none;
+        max-height: calc(100dvh - 16px);
+        padding: 10px;
+        overflow-y: auto;
+      }
+      #game-dialog > div:first-child { gap: 8px; margin-bottom: 8px !important; }
+      #game-dialog h2 { font-size: 1.15rem !important; }
+      #game-frame { height: min(70dvh, 640px) !important; min-height: 450px; }
       button {
         max-width: 100%;
         min-height: 44px;
