@@ -57,7 +57,17 @@ Le mot de passe provisoire ne s’expire pas automatiquement. Transmets-le à l�
 
 Le bouton « Mot de passe oublié ? » appelle bien `resetPasswordForEmail` de Supabase Auth. Toutefois, l’envoi dépend de la configuration e-mail du projet Supabase et ne peut pas être vérifié depuis le code du Hub.
 
-Le SMTP fourni par défaut par Supabase est réservé aux essais : il n’envoie qu’aux adresses autorisées de l’équipe du projet et limite actuellement l’envoi à environ 2 messages par heure. Les élèves ne recevront donc généralement pas de message tant qu’un SMTP personnalisé n’est pas configuré. Dans **Supabase → Authentication → SMTP Settings**, active un fournisseur SMTP, renseigne son hôte, son port et ses identifiants, ainsi qu’une adresse d’expéditeur autorisée par ce fournisseur. Consulte aussi **Authentication → Rate Limits** si plusieurs demandes ont été faites.
+Le SMTP fourni par défaut par Supabase est réservé aux essais : il n’envoie qu’aux adresses autorisées de l’équipe du projet et limite actuellement l’envoi à environ 2 messages par heure. Les élèves ne recevront donc généralement pas de message tant qu’un SMTP personnalisé n’est pas configuré.
+
+Pour utiliser un compte Gmail, active d’abord la validation en deux étapes de ce compte, puis crée un **mot de passe d’application** dans les paramètres de sécurité Google. Dans **Supabase → Authentication → SMTP Settings**, active le SMTP personnalisé et renseigne :
+
+- Hôte : `smtp.gmail.com`
+- Port : `465` avec SSL/TLS, ou `587` avec STARTTLS (selon les options proposées par Supabase)
+- Nom d’utilisateur : l’adresse Gmail complète
+- Mot de passe : le mot de passe d’application Google, pas le mot de passe normal du compte
+- Adresse d’expéditeur : cette même adresse Gmail; nom d’expéditeur suggéré : `ChronoQuest`
+
+Ne place jamais le mot de passe d’application dans le code ou dans le dépôt Git. Si Google Workspace ou les paramètres de sécurité du compte interdisent les mots de passe d’application, utilise un autre fournisseur SMTP pris en charge. Consulte aussi **Authentication → Rate Limits** si plusieurs demandes ont été faites.
 
 Vérifie ensuite que l’adresse exacte de l’élève existe dans **Authentication → Users**, que l’adresse HTTPS du Hub figure dans **Authentication → URL Configuration → Redirect URLs**, et demande à l’élève de contrôler les courriers indésirables. Le Hub masque volontairement si un compte existe : un message de succès ne garantit donc pas qu’un e-mail a été délivré. En cas d’erreur affichée, consulte également les journaux Auth du projet Supabase.
 
