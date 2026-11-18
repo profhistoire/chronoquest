@@ -939,7 +939,7 @@
               <input id="student-password" name="password" type="password" autocomplete="current-password" required>
             </div>
             <button class="primary" type="submit">Se connecter ↗</button>
-            <button class="quiet" type="button" onclick="envoyerLienReinitialisation()">Mot de passe oublié ?</button>
+            <button class="quiet" type="button" onclick="envoyerLienReinitialisation()">Demander un lien de réinitialisation par e-mail</button>
             <small id="email-hint" style="color: var(--text-muted);">Utilise le compte élève créé pour toi dans ChronoQuest. Le mot de passe de l’école ne fonctionnera que si le compte a été configuré pour cela.</small>
             <p id="student-auth-status" class="quest-auth-status" role="status" aria-live="polite"></p>
           </form>
@@ -1061,6 +1061,7 @@
               <input id="teacher-password" type="password" autocomplete="current-password" required>
             </div>
             <button class="primary" type="submit">Se connecter</button>
+            <button class="quiet" type="button" onclick="envoyerLienReinitialisationEnseignant()">Demander un lien de réinitialisation par e-mail</button>
           </form>
           <div id="teacher-session" hidden>
             <p id="teacher-session-email"></p>
@@ -1672,6 +1673,41 @@
       }
     }
 
+    async function envoyerLienReinitialisationEnseignant() {
+      const emailInput = document.getElementById('teacher-email');
+      const statut = document.getElementById('teacher-auth-status');
+      const email = emailInput.value.trim().toLocaleLowerCase('fr');
+      emailInput.value = email;
+      if (!email || !emailInput.checkValidity()) {
+        emailInput.reportValidity();
+        statut.textContent = 'Saisis d’abord ton adresse e-mail enseignante pour recevoir le lien.';
+        return;
+      }
+      if (!supabaseClient) {
+        statut.textContent = supabaseConfigurationErreur;
+        return;
+      }
+      if (!['http:', 'https:'].includes(window.location.protocol)) {
+        statut.textContent = 'La réinitialisation fonctionne depuis le site publié en HTTPS, pas depuis un fichier ouvert directement sur l’ordinateur.';
+        return;
+      }
+
+      const bouton = document.querySelector('#teacher-login-form button[onclick="envoyerLienReinitialisationEnseignant()"]');
+      bouton.disabled = true;
+      statut.textContent = 'Envoi du lien de réinitialisation…';
+      try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://profhistoire.github.io/chronoquest/'
+        });
+        if (error) throw error;
+        statut.textContent = 'Si un compte existe pour cette adresse, un e-mail contenant le lien de réinitialisation va être envoyé. Vérifie aussi les courriers indésirables.';
+      } catch (error) {
+        statut.textContent = detailErreur(error);
+      } finally {
+        bouton.disabled = false;
+      }
+    }
+
     async function connecterEleve(event) {
       event.preventDefault();
       const statut = document.getElementById('student-auth-status');
@@ -1702,7 +1738,9 @@
     async function envoyerLienReinitialisation() {
       const emailInput = document.getElementById('student-email');
       const statut = document.getElementById('student-auth-status');
-      if (!emailInput.value.trim() || !emailInput.checkValidity()) {
+      const email = emailInput.value.trim().toLocaleLowerCase('fr');
+      emailInput.value = email;
+      if (!email || !emailInput.checkValidity()) {
         emailInput.reportValidity();
         statut.textContent = 'Saisis d’abord ton adresse e-mail scolaire pour recevoir le lien.';
         return;
@@ -1720,14 +1758,14 @@
       bouton.disabled = true;
       statut.textContent = 'Envoi du lien de réinitialisation…';
       try {
-        const { error } = await supabaseClient.auth.resetPasswordForEmail(
-          emailInput.value.trim().toLocaleLowerCase('fr'),
+        const { data, error } = await supabaseClient.auth.resetPasswordForEmail(
+          email,
           { redirectTo: 'https://profhistoire.github.io/chronoquest/' }
         );
         if (error) throw error;
         statut.textContent = 'Si un compte existe pour cette adresse, un e-mail contenant le lien de réinitialisation va être envoyé. Vérifie aussi les courriers indésirables.';
       } catch (error) {
-        statut.textContent = `Impossible d’envoyer le lien : ${detailErreur(error)}. Vérifie le SMTP et les URL de redirection autorisées dans Supabase.`;
+        statut.textContent = detailErreur(error);
       } finally {
         bouton.disabled = false;
       }
